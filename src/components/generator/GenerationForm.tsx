@@ -76,10 +76,7 @@ export default function GenerationForm({
               <SelectValue placeholder="Wybierz model AI" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
-              <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-              <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
-              <SelectItem value="claude-3-sonnet">Claude 3 Sonnet</SelectItem>
+              <SelectItem value="openai/gpt-4o-mini">GPT-4o Mini</SelectItem>
             </SelectContent>
           </Select>
         </div>

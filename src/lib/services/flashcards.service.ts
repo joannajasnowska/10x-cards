@@ -1,10 +1,5 @@
 import type { SupabaseClient } from "../../db/supabase.client";
-import type {
-  CreateFlashcardAiDTO,
-  CreateFlashcardsCommand,
-  FlashcardDTO,
-  UpdateFlashcardCommand,
-} from "../../types";
+import type { CreateFlashcardAiDTO, CreateFlashcardsCommand, FlashcardDTO, UpdateFlashcardCommand } from "../../types";
 
 export class FlashcardsService {
   private supabase: SupabaseClient;

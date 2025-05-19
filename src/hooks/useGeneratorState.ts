@@ -22,7 +22,7 @@ interface FlashcardProposalViewModel {
 export default function useGeneratorState() {
   // Form state
   const [sourceText, setSourceText] = useState<string>("");
-  const [selectedModel, setSelectedModel] = useState<string>("gpt-4-turbo");
+  const [selectedModel, setSelectedModel] = useState<string>("openai/gpt-4o-mini");
 
   // Proposal state
   const [proposals, setProposals] = useState<FlashcardProposalViewModel[]>([]);

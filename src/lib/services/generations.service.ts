@@ -5,10 +5,14 @@ import type {
   GenerationFlashcardProposalDTO,
 } from "../../types";
 import { createHash } from "crypto";
-import { generateFlashcardProposals } from "./ai.mock";
+import { AiService } from "./ai.service";
 
 export class GenerationsService {
-  constructor(private readonly supabase: SupabaseClient) {}
+  private readonly aiService: AiService;
+
+  constructor(private readonly supabase: SupabaseClient) {
+    this.aiService = new AiService(supabase);
+  }
 
   private calculateTextHash(text: string): string {
     return createHash("md5").update(text).digest("hex");
@@ -76,7 +80,7 @@ export class GenerationsService {
     const generation = await this.createGenerationRecord(command, sourceTextHash, sourceTextLength);
 
     try {
-      const flashcardProposals = await generateFlashcardProposals(command.source_text, command.model);
+      const flashcardProposals = await this.aiService.generateFlashcardProposals(command.source_text, command.model);
 
       await this.updateGenerationRecord(generation.id, flashcardProposals, generation.start_date);
 
