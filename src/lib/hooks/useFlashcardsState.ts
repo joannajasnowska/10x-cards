@@ -76,34 +76,30 @@ export const useFlashcardsState = () => {
   // Create new flashcard
   const createFlashcard = useCallback(
     async (flashcard: CreateFlashcardDTO) => {
-      try {
-        const response = await fetch("/api/flashcards", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            flashcards: [
-              {
-                ...flashcard,
-                source: "manual",
-                generation_id: null,
-              },
-            ],
-          }),
-        });
+      const response = await fetch("/api/flashcards", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          flashcards: [
+            {
+              ...flashcard,
+              source: "manual",
+              generation_id: null,
+            },
+          ],
+        }),
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to create flashcard");
-        }
-
-        // Refresh list
-        await fetchFlashcards();
-
-        return true;
-      } catch (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error("Failed to create flashcard");
       }
+
+      // Refresh list
+      await fetchFlashcards();
+
+      return true;
     },
     [fetchFlashcards]
   );
@@ -111,26 +107,22 @@ export const useFlashcardsState = () => {
   // Update existing flashcard
   const updateFlashcard = useCallback(
     async (id: number, data: UpdateFlashcardCommand) => {
-      try {
-        const response = await fetch(`/api/flashcards/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
+      const response = await fetch(`/api/flashcards/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to update flashcard");
-        }
-
-        // Refresh list
-        await fetchFlashcards();
-
-        return true;
-      } catch (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error("Failed to update flashcard");
       }
+
+      // Refresh list
+      await fetchFlashcards();
+
+      return true;
     },
     [fetchFlashcards]
   );
@@ -138,22 +130,18 @@ export const useFlashcardsState = () => {
   // Delete flashcard
   const deleteFlashcard = useCallback(
     async (id: number) => {
-      try {
-        const response = await fetch(`/api/flashcards/${id}`, {
-          method: "DELETE",
-        });
+      const response = await fetch(`/api/flashcards/${id}`, {
+        method: "DELETE",
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to delete flashcard");
-        }
-
-        // Refresh list
-        await fetchFlashcards();
-
-        return true;
-      } catch (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error("Failed to delete flashcard");
       }
+
+      // Refresh list
+      await fetchFlashcards();
+
+      return true;
     },
     [fetchFlashcards]
   );

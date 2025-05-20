@@ -108,7 +108,7 @@ Remember:
       }
 
       // Transform and validate each flashcard
-      return flashcards.map((card: any) => ({
+      return flashcards.map((card: { front?: string; back?: string }) => ({
         front: String(card.front || "").slice(0, 200),
         back: String(card.back || "").slice(0, 500),
         source: "ai-complete" as const,

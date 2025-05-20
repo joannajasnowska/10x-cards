@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { supabaseClient, DEFAULT_USER_ID } from "@/db/supabase.client";
-import type { CreateFlashcardsCommand, FlashcardsListResponseDTO } from "@/types";
+import type { FlashcardsListResponseDTO } from "@/types";
 
 // Schema for query parameters
 const flashcardsQuerySchema = z.object({

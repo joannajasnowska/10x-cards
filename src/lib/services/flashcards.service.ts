@@ -14,7 +14,11 @@ export class FlashcardsService {
    * @param userId The ID of the user who initiated the request
    * @param flashcardData The data of the AI flashcard that caused the error
    */
-  private async logAiFlashcardError(error: any, userId: string, flashcardData: CreateFlashcardAiDTO) {
+  private async logAiFlashcardError(
+    error: Error | { code?: string; message?: string },
+    userId: string,
+    flashcardData: CreateFlashcardAiDTO
+  ) {
     try {
       // Fetch generation data if generation_id is provided
       let generationData = null;
@@ -34,7 +38,7 @@ export class FlashcardsService {
       await this.supabase.from("generation_logs").insert({
         user_id: userId,
         generation_id: flashcardData.generation_id || 0, // Default to 0 if null
-        error_code: error.code || "UNKNOWN_ERROR",
+        error_code: ("code" in error && error.code) || "UNKNOWN_ERROR",
         error_message: error.message || "Unknown error during AI flashcard creation",
         model: generationData?.model || "unknown",
         source_text_hash: generationData?.source_text_hash || "",
@@ -226,7 +230,7 @@ export class FlashcardsService {
    */
   async updateFlashcard(id: number, command: UpdateFlashcardCommand, userId: string): Promise<FlashcardDTO> {
     // Check if the flashcard exists and belongs to the user
-    const { data: existingFlashcard, error: checkError } = await this.supabase
+    const { error: checkError } = await this.supabase
       .from("flashcards")
       .select("id, generation_id, source")
       .eq("id", id)
@@ -251,7 +255,7 @@ export class FlashcardsService {
     }
 
     // Update the flashcard
-    const { data, error } = await this.supabase
+    const { data: updatedFlashcard, error } = await this.supabase
       .from("flashcards")
       .update(command)
       .eq("id", id)
@@ -263,7 +267,7 @@ export class FlashcardsService {
       throw error;
     }
 
-    return data as FlashcardDTO;
+    return updatedFlashcard as FlashcardDTO;
   }
 
   /**

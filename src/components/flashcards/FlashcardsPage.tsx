@@ -25,6 +25,7 @@ export default function FlashcardsPage() {
     setDeletingFlashcard,
     updateFilters,
     changePage,
+    setState,
   } = useFlashcardsState();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -47,8 +48,9 @@ export default function FlashcardsPage() {
         await createFlashcard(flashcardData as CreateFlashcardDTO);
       }
       setEditingFlashcard(null);
-    } catch (err) {
-      console.error("Failed to save flashcard:", err);
+    } catch {
+      // Set error state instead of using console.error
+      setState((prev) => ({ ...prev, error: "Nie udało się zapisać fiszki. Spróbuj ponownie." }));
     } finally {
       setIsSaving(false);
     }
@@ -70,8 +72,9 @@ export default function FlashcardsPage() {
     try {
       await deleteFlashcard(id);
       setDeletingFlashcard(null);
-    } catch (err) {
-      console.error("Failed to delete flashcard:", err);
+    } catch {
+      // Set error state instead of using console.error
+      setState((prev) => ({ ...prev, error: "Nie udało się usunąć fiszki. Spróbuj ponownie." }));
     } finally {
       setIsDeleting(false);
     }

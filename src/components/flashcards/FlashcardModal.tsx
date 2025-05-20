@@ -25,7 +25,7 @@ interface FlashcardModalProps {
 
 export default function FlashcardModal({ flashcard, isOpen, onClose, onSave, isSaving = false }: FlashcardModalProps) {
   const isNewFlashcard = !flashcard || !flashcard.id;
-  const { form, updateField, validateForm, resetForm, setIsSaving } = useFlashcardForm(
+  const { form, updateField, validateForm, resetForm, setIsSaving, setForm } = useFlashcardForm(
     flashcard?.id ? flashcard : undefined
   );
 
@@ -46,15 +46,18 @@ export default function FlashcardModal({ flashcard, isOpen, onClose, onSave, isS
     if (!validateForm()) return;
 
     try {
-      const saveData = {
+      const saveData: CreateFlashcardDTO | UpdateFlashcardCommand = {
         front: form.front,
         back: form.back,
         source: "manual" as const,
       };
 
       await onSave(saveData);
-    } catch (error) {
-      console.error("Error saving flashcard:", error);
+    } catch {
+      setForm((prev) => ({
+        ...prev,
+        frontError: "Błąd podczas zapisywania fiszki. Spróbuj ponownie.",
+      }));
     }
   };
 

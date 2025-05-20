@@ -109,7 +109,7 @@ export class OpenRouterService {
     } catch (error) {
       if (error instanceof Error) {
         switch (error.name) {
-          case "ValidationError":
+          case "ValidationError": {
             const validationError = this.handleError({
               code: "VALIDATION_ERROR",
               message: "Invalid request format",
@@ -117,7 +117,8 @@ export class OpenRouterService {
             });
             this.logger.error("Validation error in chat request", validationError);
             throw validationError;
-          case "AbortError":
+          }
+          case "AbortError": {
             const timeoutError = this.handleError({
               code: "TIMEOUT_ERROR",
               message: "Request timed out",
@@ -125,10 +126,12 @@ export class OpenRouterService {
             });
             this.logger.error("Timeout error in chat request", timeoutError);
             throw timeoutError;
-          default:
+          }
+          default: {
             const unknownError = this.handleError(error);
             this.logger.error("Unknown error in chat request", unknownError);
             throw unknownError;
+          }
         }
       }
       const genericError = this.handleError(error);

@@ -151,67 +151,70 @@ export default function useGeneratorState() {
   }, []);
 
   // Helper to save flashcards to API
-  const saveFlashcards = async (flashcardsToSave: FlashcardProposalViewModel[]) => {
-    if (flashcardsToSave.length === 0) return;
+  const saveFlashcards = useCallback(
+    async (flashcardsToSave: FlashcardProposalViewModel[]) => {
+      if (flashcardsToSave.length === 0) return;
 
-    setSaveError(null);
-    setIsSaving(true);
+      setSaveError(null);
+      setIsSaving(true);
 
-    try {
-      // Transform view models to API DTOs
-      const flashcardDTOs: CreateFlashcardAiDTO[] = flashcardsToSave.map((p) => ({
-        front: p.front,
-        back: p.back,
-        source: p.source,
-        model: p.model,
-        generation_id: p.generation_id,
-      }));
+      try {
+        // Transform view models to API DTOs
+        const flashcardDTOs: CreateFlashcardAiDTO[] = flashcardsToSave.map((p) => ({
+          front: p.front,
+          back: p.back,
+          source: p.source,
+          model: p.model,
+          generation_id: p.generation_id,
+        }));
 
-      const response = await fetch("/api/flashcards", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ flashcards: flashcardDTOs }),
-      });
+        const response = await fetch("/api/flashcards", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ flashcards: flashcardDTOs }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to save flashcards");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to save flashcards");
+        }
+
+        // Show success toast first
+        toast.success("Zapisano fiszki", {
+          description: `Zapisano ${flashcardsToSave.length} fiszek w bazie danych.`,
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+        setSaveError(errorMessage);
+        toast.error("Błąd zapisywania", {
+          description: errorMessage,
+        });
+        return;
+      } finally {
+        setIsSaving(false);
       }
 
-      // Show success toast first
-      toast.success("Zapisano fiszki", {
-        description: `Zapisano ${flashcardsToSave.length} fiszek w bazie danych.`,
-      });
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
-      setSaveError(errorMessage);
-      toast.error("Błąd zapisywania", {
-        description: errorMessage,
-      });
-      return;
-    } finally {
-      setIsSaving(false);
-    }
-
-    // Reset generator screen after successful save (only if we didn't hit the error case)
-    // This ensures the reset happens after the toast is shown and other states are updated
-    resetGeneratorState();
-  };
+      // Reset generator screen after successful save (only if we didn't hit the error case)
+      // This ensures the reset happens after the toast is shown and other states are updated
+      resetGeneratorState();
+    },
+    [resetGeneratorState, setIsSaving, setSaveError]
+  );
 
   // Handler for saving approved flashcards
   const handleSaveApproved = useCallback(async () => {
     const flashcardsToSave = proposals.filter((p) => p.status === "accepted" || p.status === "edited");
 
     await saveFlashcards(flashcardsToSave);
-  }, [proposals]);
+  }, [proposals, saveFlashcards]);
 
   // Handler for saving all flashcards
   const handleSaveAll = useCallback(async () => {
     const flashcardsToSave = proposals.filter((p) => p.status !== "rejected");
     await saveFlashcards(flashcardsToSave);
-  }, [proposals]);
+  }, [proposals, saveFlashcards]);
 
   return {
     sourceText,

@@ -23,6 +23,14 @@ const baseConfig = tseslint.config({
   },
 });
 
+// Allow console logs in services and API files for logging purposes
+const servicesAndApiConfig = tseslint.config({
+  files: ["**/src/lib/**/*.ts", "**/src/pages/api/**/*.ts"],
+  rules: {
+    "no-console": "off",
+  },
+});
+
 const jsxA11yConfig = tseslint.config({
   files: ["**/*.{js,jsx,ts,tsx}"],
   extends: [jsxA11y.flatConfigs.recommended],
@@ -59,6 +67,7 @@ const reactConfig = tseslint.config({
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   baseConfig,
+  servicesAndApiConfig,
   jsxA11yConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
