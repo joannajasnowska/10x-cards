@@ -159,7 +159,7 @@ Główne założenia struktury:
      - Edytować (przycisk "Edytuj" → otwiera modal edycji)
      - Odrzucić (przycisk "Odrzuć")
    - Po recenzji klika "Zapisz zatwierdzone" lub "Zapisz wszystkie"
-   - System zapisuje fiszki i wyświetla komunikat sukcesu
+   - System zapisuje fiszki i wyświetla komunikat sukcesu. Ekran Generator sie resetuje.
    - Użytkownik może wygenerować nowe fiszki lub przejść do "Moich fiszek"
 
 3. **Przeglądanie zapisanych fiszek**

@@ -18,7 +18,7 @@ export default function CharacterCounter({ current, max, className }: CharacterC
   };
 
   return (
-    <div className={cn("text-xs flex justify-end", getTextColor(), className)}>
+    <div className={cn("text-xs flex-shrink-0 whitespace-nowrap", getTextColor(), className)}>
       <span>
         {current}/{max}
       </span>

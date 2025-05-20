@@ -43,6 +43,16 @@ export default function useGeneratorState() {
   // Computed property for editing proposal
   const editingProposal = editingProposalId ? proposals.find((p) => p.id === editingProposalId) || null : null;
 
+  // Reset generator state
+  const resetGeneratorState = useCallback(() => {
+    setSourceText("");
+    setProposals([]);
+    setGenerationId(null);
+    setGenerationModel(null);
+    setGenerationError(null);
+    setSaveError(null);
+  }, []);
+
   // Handler for generating flashcards
   const handleGenerate = useCallback(async () => {
     setGenerationError(null);
@@ -89,7 +99,7 @@ export default function useGeneratorState() {
       setGenerationModel(selectedModel);
 
       toast.success("Wygenerowano fiszki", {
-        description: `Pomyślnie wygenerowano ${data.ai_complete_count} propozycji fiszek.`,
+        description: `Wygenerowano ${data.ai_complete_count} propozycji fiszek.`,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
@@ -133,10 +143,6 @@ export default function useGeneratorState() {
       )
     );
     setEditingProposalId(null);
-
-    toast.success("Zapisano zmiany", {
-      description: "Pomyślnie zaktualizowano fiszkę.",
-    });
   }, []);
 
   // Handler for canceling edits
@@ -174,17 +180,9 @@ export default function useGeneratorState() {
         throw new Error(errorData.message || "Failed to save flashcards");
       }
 
-      // On success, mark all saved as accepted
-      setProposals((prev) =>
-        prev.map((p) => {
-          const wasSaved = flashcardsToSave.some((saved) => saved.id === p.id);
-          return wasSaved ? { ...p, status: "accepted" } : p;
-        })
-      );
-
-      // Show success toast
+      // Show success toast first
       toast.success("Zapisano fiszki", {
-        description: `Pomyślnie zapisano ${flashcardsToSave.length} fiszek w bazie danych.`,
+        description: `Zapisano ${flashcardsToSave.length} fiszek w bazie danych.`,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
@@ -192,9 +190,14 @@ export default function useGeneratorState() {
       toast.error("Błąd zapisywania", {
         description: errorMessage,
       });
+      return;
     } finally {
       setIsSaving(false);
     }
+
+    // Reset generator screen after successful save (only if we didn't hit the error case)
+    // This ensures the reset happens after the toast is shown and other states are updated
+    resetGeneratorState();
   };
 
   // Handler for saving approved flashcards

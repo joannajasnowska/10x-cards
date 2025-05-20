@@ -56,9 +56,13 @@ export const useFlashcardForm = (initialData?: FlashcardDTO) => {
 
   // Update field values
   const updateField = useCallback((field: "front" | "back", value: string) => {
+    const maxLength = field === "front" ? 200 : 500;
+    // Truncate the value if it exceeds the max length
+    const truncatedValue = value.slice(0, maxLength);
+
     setForm((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: truncatedValue,
     }));
   }, []);
 

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import "./flashcard-modal.css";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,10 @@ interface FlashcardModalProps {
 }
 
 export default function FlashcardModal({ flashcard, isOpen, onClose, onSave, isSaving = false }: FlashcardModalProps) {
-  const { form, updateField, validateForm, resetForm, setIsSaving } = useFlashcardForm(flashcard || undefined);
+  const isNewFlashcard = !flashcard || !flashcard.id;
+  const { form, updateField, validateForm, resetForm, setIsSaving } = useFlashcardForm(
+    flashcard?.id ? flashcard : undefined
+  );
 
   // Update isSaving state when prop changes
   useEffect(() => {
@@ -56,22 +60,23 @@ export default function FlashcardModal({ flashcard, isOpen, onClose, onSave, isS
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[550px]">
-        <DialogHeader>
-          <DialogTitle>{flashcard ? "Edytuj fiszkę" : "Dodaj nową fiszkę"}</DialogTitle>
+      <DialogContent className="sm:max-w-[550px] max-h-[95vh] w-[95vw] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle>{isNewFlashcard ? "Dodaj nową fiszkę" : "Edytuj fiszkę"}</DialogTitle>
           <DialogDescription>
-            {flashcard
-              ? "Wprowadź zmiany w istniejącej fiszce."
-              : "Wypełnij pola, aby utworzyć nową fiszkę. Przód powinien zawierać pytanie lub termin, a tył - odpowiedź lub definicję."}
+            {isNewFlashcard
+              ? "Wypełnij pola, aby utworzyć nową fiszkę. Przód powinien zawierać pytanie lub termin, a tył - odpowiedź lub definicję."
+              : "Wprowadź zmiany w istniejącej fiszce."}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-6 py-4">
+        <div className="grid gap-6 py-4 overflow-y-auto flex-grow">
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="front" className="text-sm font-medium">
+            <div className="flex flex-row justify-between items-center gap-2">
+              <Label htmlFor="front" className="text-sm font-medium min-w-[80px]">
                 Przód fiszki
               </Label>
+              <span className="flex-grow"></span>
               <CharacterCounter current={form.front.length} max={200} />
             </div>
             <Textarea
@@ -79,17 +84,27 @@ export default function FlashcardModal({ flashcard, isOpen, onClose, onSave, isS
               placeholder="Wpisz pytanie lub termin..."
               value={form.front}
               onChange={(e) => updateField("front", e.target.value)}
-              rows={2}
-              className={form.frontError ? "border-destructive" : ""}
+              rows={3}
+              maxLength={200}
+              style={{
+                wordBreak: "break-word",
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                width: "100%",
+              }}
+              className={`resize-none min-h-[80px] ${form.frontError ? "border-destructive" : ""}`}
+              data-front-text
             />
             {form.frontError && <p className="text-sm text-destructive">{form.frontError}</p>}
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="back" className="text-sm font-medium">
+            <div className="flex flex-row justify-between items-center gap-2">
+              <Label htmlFor="back" className="text-sm font-medium min-w-[80px]">
                 Tył fiszki
               </Label>
+              <span className="flex-grow"></span>
               <CharacterCounter current={form.back.length} max={500} />
             </div>
             <Textarea
@@ -97,14 +112,23 @@ export default function FlashcardModal({ flashcard, isOpen, onClose, onSave, isS
               placeholder="Wpisz odpowiedź lub definicję..."
               value={form.back}
               onChange={(e) => updateField("back", e.target.value)}
-              rows={6}
-              className={form.backError ? "border-destructive" : ""}
+              rows={8}
+              maxLength={500}
+              style={{
+                wordBreak: "break-word",
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
+                width: "100%",
+              }}
+              className={`resize-none min-h-[200px] max-h-[300px] overflow-y-auto ${form.backError ? "border-destructive" : ""}`}
+              data-back-text
             />
             {form.backError && <p className="text-sm text-destructive">{form.backError}</p>}
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0 mt-2">
           <Button variant="outline" onClick={onClose} disabled={form.isSaving}>
             Anuluj
           </Button>

@@ -32,14 +32,14 @@ export default function FlashcardsPage() {
 
   // Handle adding new flashcard
   const handleAddNew = () => {
-    setEditingFlashcard(null); // null means creating new
+    setEditingFlashcard({} as FlashcardDTO); // Use empty object to indicate creating new
   };
 
   // Handle saving flashcard (create or update)
   const handleSaveFlashcard = async (flashcardData: CreateFlashcardDTO | UpdateFlashcardCommand) => {
     setIsSaving(true);
     try {
-      if (editingFlashcard) {
+      if (editingFlashcard && editingFlashcard.id) {
         // Update existing
         await updateFlashcard(editingFlashcard.id, flashcardData as UpdateFlashcardCommand);
       } else {

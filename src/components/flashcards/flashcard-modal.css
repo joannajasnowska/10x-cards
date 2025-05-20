@@ -1,0 +1,19 @@
+/* Custom styles for textareas in the flashcard modal */
+[data-front-text],
+[data-back-text] {
+  word-break: break-word !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  width: 100% !important;
+  line-height: 1.5 !important;
+}
+
+/* Add spacing between lines for better readability */
+[data-front-text] {
+  min-height: 80px !important;
+}
+
+[data-back-text] {
+  min-height: 200px !important;
+}

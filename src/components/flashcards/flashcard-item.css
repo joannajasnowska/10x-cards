@@ -1,0 +1,44 @@
+/* Custom styles for flashcard items in the list view */
+.flashcard-front {
+  word-break: break-word !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  width: 100% !important;
+  line-height: 1.5 !important;
+  max-height: 150px !important;
+  overflow-y: auto !important;
+  display: block !important;
+  margin-right: 12px !important;
+}
+
+.flashcard-back {
+  word-break: break-word !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  width: 100% !important;
+  line-height: 1.5 !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  display: block !important;
+  padding: 8px 0 !important;
+}
+
+/* Make sure the card maintains proper layout */
+.card-header-content {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 640px) {
+  .flashcard-front {
+    max-height: 120px !important;
+  }
+
+  .flashcard-back {
+    max-height: 200px !important;
+  }
+}
