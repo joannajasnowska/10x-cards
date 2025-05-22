@@ -67,7 +67,6 @@ export type UpdateFlashcardCommand = Partial<{
 // Command model for initiating flashcard generation
 export interface InitiateGenerationCommand {
   source_text: string; // Must be between 1000 and 10000 characters
-  model: string; // Identifier for the selected AI model
 }
 
 // DTO for a generation event derived from the Generation entity

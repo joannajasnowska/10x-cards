@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback, memo } from "react";
 import FlashcardProposalItem from "./FlashcardProposalItem";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
@@ -26,7 +26,7 @@ interface FlashcardsProposalListProps {
   onSaveAll: () => void;
 }
 
-export default function FlashcardsProposalList({
+function FlashcardsProposalList({
   proposals,
   isSaving,
   onAccept,
@@ -54,49 +54,64 @@ export default function FlashcardsProposalList({
 
   const hasPendingOrApprovedOrEdited = useMemo(() => proposals.some((p) => p.status !== "rejected"), [proposals]);
 
+  // Używamy useCallback dla handlerów, które przekazujemy do komponentów potomnych
+  const handleAccept = useCallback((proposalId: string) => onAccept(proposalId), [onAccept]);
+  const handleReject = useCallback((proposalId: string) => onReject(proposalId), [onReject]);
+  const handleEdit = useCallback((proposalId: string) => onEdit(proposalId), [onEdit]);
+  const handleSaveApproved = useCallback(() => onSaveApproved(), [onSaveApproved]);
+  const handleSaveAll = useCallback(() => onSaveAll(), [onSaveAll]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2 items-center justify-between border-b pb-4">
         <div className="text-lg font-medium">Propozycje fiszek ({counts.total})</div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="bg-white">
+          <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-300">
             <span className="text-muted-foreground">Oczekujące:</span>{" "}
             <span className="font-semibold ml-1">{counts.pending}</span>
           </Badge>
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
             <span>Zaakceptowane:</span> <span className="font-semibold ml-1">{counts.accepted}</span>
           </Badge>
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300">
             <span>Edytowane:</span> <span className="font-semibold ml-1">{counts.edited}</span>
           </Badge>
-          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+          <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
             <span>Odrzucone:</span> <span className="font-semibold ml-1">{counts.rejected}</span>
           </Badge>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1">
         {proposals.map((proposal) => (
           <FlashcardProposalItem
             key={proposal.id}
             proposal={proposal}
-            onAccept={onAccept}
-            onReject={onReject}
-            onEdit={onEdit}
+            onAccept={handleAccept}
+            onReject={handleReject}
+            onEdit={handleEdit}
           />
         ))}
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t">
-        <Button variant="outline" onClick={onSaveAll} disabled={!hasPendingOrApprovedOrEdited || isSaving}>
-          <SaveIcon className="w-4 h-4 mr-2" />
+        <Button
+          variant="outline"
+          onClick={handleSaveAll}
+          disabled={!hasPendingOrApprovedOrEdited || isSaving}
+          className="gap-2 h-8"
+        >
+          <SaveIcon className="w-3.5 h-3.5" />
           Zapisz wszystkie
         </Button>
-        <Button onClick={onSaveApproved} disabled={!hasApprovedOrEdited || isSaving}>
-          <CheckCircleIcon className="w-4 h-4 mr-2" />
+        <Button onClick={handleSaveApproved} disabled={!hasApprovedOrEdited || isSaving} className="gap-2 h-8">
+          <CheckCircleIcon className="w-3.5 h-3.5" />
           {isSaving ? "Zapisywanie..." : "Zapisz zatwierdzone"}
         </Button>
       </div>
     </div>
   );
 }
+
+// Używamy memo, aby komponent rerenderował się tylko gdy jego propsy się zmieniają
+export default memo(FlashcardsProposalList);

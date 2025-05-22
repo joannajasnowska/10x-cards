@@ -1,30 +1,21 @@
 import React, { useCallback } from "react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import CharacterCounter from "../ui/CharacterCounter";
+import { Sparkles } from "lucide-react";
 import type { InitiateGenerationCommand } from "../../types";
 
 interface GenerationFormProps {
   sourceText: string;
-  selectedModel: string;
   isGenerating: boolean;
   onInputChange: (text: string) => void;
-  onModelChange: (model: string) => void;
   onSubmit: (command: InitiateGenerationCommand) => void;
 }
 
 const MIN_CHAR_COUNT = 1000;
 const MAX_CHAR_COUNT = 10000;
 
-export default function GenerationForm({
-  sourceText,
-  selectedModel,
-  isGenerating,
-  onInputChange,
-  onModelChange,
-  onSubmit,
-}: GenerationFormProps) {
+export default function GenerationForm({ sourceText, isGenerating, onInputChange, onSubmit }: GenerationFormProps) {
   const isValidLength = sourceText.length >= MIN_CHAR_COUNT && sourceText.length <= MAX_CHAR_COUNT;
 
   const handleTextChange = useCallback(
@@ -34,13 +25,6 @@ export default function GenerationForm({
     [onInputChange]
   );
 
-  const handleModelSelect = useCallback(
-    (value: string) => {
-      onModelChange(value);
-    },
-    [onModelChange]
-  );
-
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
@@ -48,12 +32,11 @@ export default function GenerationForm({
 
       const command: InitiateGenerationCommand = {
         source_text: sourceText,
-        model: selectedModel,
       };
 
       onSubmit(command);
     },
-    [sourceText, selectedModel, isValidLength, isGenerating, onSubmit]
+    [sourceText, isValidLength, isGenerating, onSubmit]
   );
 
   return (
@@ -69,19 +52,9 @@ export default function GenerationForm({
         <CharacterCounter currentCount={sourceText.length} min={MIN_CHAR_COUNT} max={MAX_CHAR_COUNT} />
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="w-full sm:w-64">
-          <Select value={selectedModel} onValueChange={handleModelSelect} disabled={isGenerating}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Wybierz model AI" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="openai/gpt-4o-mini">GPT-4o Mini</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <Button type="submit" disabled={!isValidLength || isGenerating} className="w-full sm:w-auto">
+      <div className="flex justify-end">
+        <Button type="submit" disabled={!isValidLength || isGenerating} className="w-full sm:w-auto gap-2">
+          <Sparkles className="h-4 w-4" />
           {isGenerating ? "Generowanie..." : "Generuj Fiszki"}
         </Button>
       </div>

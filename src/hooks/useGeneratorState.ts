@@ -19,10 +19,12 @@ interface FlashcardProposalViewModel {
   generation_id: number;
 }
 
+// Domyślny model AI używany do generacji
+const DEFAULT_AI_MODEL = "openai/gpt-4o-mini";
+
 export default function useGeneratorState() {
   // Form state
   const [sourceText, setSourceText] = useState<string>("");
-  const [selectedModel, setSelectedModel] = useState<string>("openai/gpt-4o-mini");
 
   // Proposal state
   const [proposals, setProposals] = useState<FlashcardProposalViewModel[]>([]);
@@ -54,16 +56,11 @@ export default function useGeneratorState() {
   }, []);
 
   // Handler for generating flashcards
-  const handleGenerate = useCallback(async () => {
+  const handleGenerate = useCallback(async (command: InitiateGenerationCommand) => {
     setGenerationError(null);
     setIsGenerating(true);
 
     try {
-      const command: InitiateGenerationCommand = {
-        source_text: sourceText,
-        model: selectedModel,
-      };
-
       const response = await fetch("/api/generations", {
         method: "POST",
         headers: {
@@ -89,14 +86,14 @@ export default function useGeneratorState() {
           originalFront: proposal.front,
           originalBack: proposal.back,
           source: "ai-complete",
-          model: selectedModel,
+          model: DEFAULT_AI_MODEL,
           generation_id: data.generation_id,
         })
       );
 
       setProposals(viewModels);
       setGenerationId(data.generation_id);
-      setGenerationModel(selectedModel);
+      setGenerationModel(DEFAULT_AI_MODEL);
 
       toast.success("Wygenerowano fiszki", {
         description: `Wygenerowano ${data.ai_complete_count} propozycji fiszek.`,
@@ -110,7 +107,7 @@ export default function useGeneratorState() {
     } finally {
       setIsGenerating(false);
     }
-  }, [sourceText, selectedModel]);
+  }, []);
 
   // Handler for accepting a proposal
   const handleAccept = useCallback((proposalId: string) => {
@@ -218,7 +215,6 @@ export default function useGeneratorState() {
 
   return {
     sourceText,
-    selectedModel,
     proposals,
     generationId,
     generationModel,
@@ -229,7 +225,6 @@ export default function useGeneratorState() {
     editingProposalId,
     editingProposal,
     setSourceText,
-    setSelectedModel,
     handleGenerate,
     handleAccept,
     handleReject,

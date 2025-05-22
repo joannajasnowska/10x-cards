@@ -77,7 +77,7 @@ export default function FlashcardItem({ flashcard, onEdit, onDelete }: Flashcard
                   <span className="text-xs">{getSourceText()}</span>
                 </Badge>
               </div>
-              <div className="mt-2 font-semibold text-lg flashcard-front">{flashcard.front}</div>
+              <div className="mt-6 font-semibold text-lg flashcard-front">{flashcard.front}</div>
             </div>
             <CollapsibleTrigger asChild className="flex-shrink-0">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">

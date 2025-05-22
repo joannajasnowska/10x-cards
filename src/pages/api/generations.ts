@@ -9,7 +9,6 @@ const GenerationRequestSchema = z.object({
     .string()
     .min(1000, "Source text must be at least 1000 characters long")
     .max(10000, "Source text cannot exceed 10000 characters"),
-  model: z.string().min(1, "Model identifier is required"),
 });
 
 export const prerender = false;

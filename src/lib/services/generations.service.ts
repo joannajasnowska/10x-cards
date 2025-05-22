@@ -7,6 +7,9 @@ import type {
 import { createHash } from "crypto";
 import { AiService } from "./ai.service";
 
+// Domyślny model AI używany do generacji
+const DEFAULT_AI_MODEL = "openai/gpt-4o-mini";
+
 export class GenerationsService {
   private readonly aiService: AiService;
 
@@ -18,18 +21,14 @@ export class GenerationsService {
     return createHash("md5").update(text).digest("hex");
   }
 
-  private async createGenerationRecord(
-    command: InitiateGenerationCommand,
-    sourceTextHash: string,
-    sourceTextLength: number
-  ) {
+  private async createGenerationRecord(sourceText: string, sourceTextHash: string, sourceTextLength: number) {
     const startDate = new Date().toISOString();
 
     const { data: generation, error: insertError } = await this.supabase
       .from("generations")
       .insert({
         user_id: DEFAULT_USER_ID,
-        model: command.model,
+        model: DEFAULT_AI_MODEL,
         source_text_hash: sourceTextHash,
         source_text_length: sourceTextLength,
         start_date: startDate,
@@ -77,10 +76,10 @@ export class GenerationsService {
     const sourceTextHash = this.calculateTextHash(command.source_text);
     const sourceTextLength = command.source_text.length;
 
-    const generation = await this.createGenerationRecord(command, sourceTextHash, sourceTextLength);
+    const generation = await this.createGenerationRecord(command.source_text, sourceTextHash, sourceTextLength);
 
     try {
-      const flashcardProposals = await this.aiService.generateFlashcardProposals(command.source_text, command.model);
+      const flashcardProposals = await this.aiService.generateFlashcardProposals(command.source_text, DEFAULT_AI_MODEL);
 
       await this.updateGenerationRecord(generation.id, flashcardProposals, generation.start_date);
 
@@ -95,7 +94,7 @@ export class GenerationsService {
         generation_id: generation.id,
         error_code: "AI_PROCESSING_ERROR",
         error_message: error instanceof Error ? error.message : "Unknown error",
-        model: command.model,
+        model: DEFAULT_AI_MODEL,
         source_text_hash: sourceTextHash,
         source_text_length: sourceTextLength,
         user_id: DEFAULT_USER_ID,

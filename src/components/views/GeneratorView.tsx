@@ -9,7 +9,6 @@ import useGeneratorState from "../../hooks/useGeneratorState";
 export default function GeneratorView() {
   const {
     sourceText,
-    selectedModel,
     proposals,
     isGenerating,
     isSaving,
@@ -18,7 +17,6 @@ export default function GeneratorView() {
     editingProposalId,
     editingProposal,
     setSourceText,
-    setSelectedModel,
     handleGenerate,
     handleAccept,
     handleReject,
@@ -33,10 +31,8 @@ export default function GeneratorView() {
     <div className="space-y-6">
       <GenerationForm
         sourceText={sourceText}
-        selectedModel={selectedModel}
         isGenerating={isGenerating}
         onInputChange={setSourceText}
-        onModelChange={setSelectedModel}
         onSubmit={handleGenerate}
       />
 
