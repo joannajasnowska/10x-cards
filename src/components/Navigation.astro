@@ -51,7 +51,7 @@ const { activeItem } = Astro.props;
     </nav>
 
     <!-- User menu and mobile button container with fixed width -->
-    <div class="flex items-center w-48 justify-end">
+    <div class="flex items-center w-48 justify-end relative">
       <button
         id="user-menu-button"
         class="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors"
@@ -87,7 +87,7 @@ const { activeItem } = Astro.props;
       <!-- Dropdown menu (hidden by default) -->
       <div
         id="user-dropdown"
-        class="absolute right-4 mt-40 w-48 bg-card rounded-md shadow-lg py-1 hidden border border-border"
+        class="absolute mt-10 w-48 bg-card rounded-md shadow-lg py-1 hidden border border-border right-0 top-0"
         role="menu"
         aria-orientation="vertical"
         aria-labelledby="user-menu-button"
@@ -174,7 +174,8 @@ const { activeItem } = Astro.props;
   const userMenuButton = document.getElementById("user-menu-button");
   const userDropdown = document.getElementById("user-dropdown");
 
-  userMenuButton?.addEventListener("click", () => {
+  userMenuButton?.addEventListener("click", (e) => {
+    e.stopPropagation();
     const expanded = userMenuButton.getAttribute("aria-expanded") === "true";
     userMenuButton.setAttribute("aria-expanded", (!expanded).toString());
     userDropdown?.classList.toggle("hidden");
