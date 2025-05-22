@@ -1,0 +1,30 @@
+---
+// Komponent zapobiegający przesuwaniu się układu podczas ładowania
+---
+
+<script is:inline>
+  // Kod wykonywany natychmiast, przed renderowaniem strony
+  document.documentElement.classList.add("layout-fixed");
+  document.documentElement.style.overflowY = "scroll";
+</script>
+
+<script>
+  // Kod wykonywany po załadowaniu DOM
+  function stabilizeLayout() {
+    // Wymuszenie stałego paska przewijania pionowego
+    document.documentElement.style.overflowY = "scroll";
+    document.documentElement.style.overflowX = "hidden";
+
+    // Oznacz jako załadowane
+    setTimeout(() => {
+      document.documentElement.classList.add("layout-loaded");
+    }, 100);
+  }
+
+  // Uruchom przy pierwszym ładowaniu
+  stabilizeLayout();
+
+  // Uruchom również przy przejściach między stronami
+  document.addEventListener("astro:page-load", stabilizeLayout);
+  document.addEventListener("astro:after-swap", stabilizeLayout);
+</script>

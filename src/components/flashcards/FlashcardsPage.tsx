@@ -25,7 +25,6 @@ export default function FlashcardsPage() {
     setDeletingFlashcard,
     updateFilters,
     changePage,
-    setState,
   } = useFlashcardsState();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -91,7 +90,7 @@ export default function FlashcardsPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div className="space-y-6">
       {/* Error display */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">

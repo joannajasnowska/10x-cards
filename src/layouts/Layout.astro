@@ -1,6 +1,7 @@
 ---
 import { Toaster } from "../components/ui/sonner";
 import Navigation from "../components/Navigation.astro";
+import LayoutStabilizer from "../components/LayoutStabilizer.astro";
 import "../styles/global.css";
 
 interface Props {
@@ -17,30 +18,27 @@ const { title, showNavigation = false, activeNavItem } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content="Generator fiszek do nauki słownictwa" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <LayoutStabilizer />
   </head>
-  <body class="min-h-screen bg-gray-50">
+  <body class="min-h-screen bg-background text-foreground overflow-x-hidden">
     <!-- Toast notifications -->
     <Toaster client:load position="top-center" />
 
-    {showNavigation && <Navigation activeItem={activeNavItem} />}
+    <div class="layout-wrapper">
+      {showNavigation && <Navigation activeItem={activeNavItem} />}
 
-    <main class="container mx-auto px-4 py-6">
-      <slot />
-    </main>
+      <main class="mx-auto px-6 md:px-12 lg:px-16 max-w-6xl py-8">
+        <slot />
+      </main>
+    </div>
   </body>
 </html>
 
 <style is:global>
-  :root {
-    --accent: 136, 58, 234;
-    --accent-light: 224, 204, 250;
-    --accent-dark: 49, 10, 101;
-    --accent-gradient: linear-gradient(45deg, rgb(var(--accent)), rgb(var(--accent-light)) 30%, white 60%);
-  }
   html {
     font-family: system-ui, sans-serif;
   }
