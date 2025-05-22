@@ -3,6 +3,6 @@ import Layout from "../../layouts/Layout.astro";
 import FlashcardsPage from "@/components/flashcards/FlashcardsPage";
 ---
 
-<Layout title="Moje Fiszki">
+<Layout title="Moje Fiszki" showNavigation={true} activeNavItem="flashcards">
   <FlashcardsPage client:load />
 </Layout>

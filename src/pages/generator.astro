@@ -3,9 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import GeneratorView from "../components/views/GeneratorView";
 ---
 
-<Layout title="Generator Fiszek">
-  <main class="container mx-auto p-4 md:p-6">
-    <h1 class="text-3xl font-bold mb-6">Generator Fiszek</h1>
-    <GeneratorView client:load />
-  </main>
+<Layout title="Generator Fiszek" showNavigation={true} activeNavItem="generator">
+  <h1 class="text-3xl font-bold mb-6">Generator Fiszek</h1>
+  <GeneratorView client:load />
 </Layout>
