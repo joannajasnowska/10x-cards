@@ -1,0 +1,55 @@
+---
+import { Toaster } from "../components/ui/sonner";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Generator fiszek do nauki słownictwa" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <!-- Toast notifications -->
+    <Toaster client:load position="top-center" />
+
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+          <h1 class="text-2xl font-bold">10x Cards</h1>
+          <p class="text-muted-foreground">Generator fiszek do nauki słownictwa</p>
+        </div>
+        <div class="bg-card border rounded-lg shadow-sm p-6">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  html {
+    font-family: system-ui, sans-serif;
+  }
+  code {
+    font-family:
+      Menlo,
+      Monaco,
+      Lucida Console,
+      Liberation Mono,
+      DejaVu Sans Mono,
+      Bitstream Vera Sans Mono,
+      Courier New,
+      monospace;
+  }
+</style>

@@ -110,13 +110,30 @@ Kryteria akceptacji:
 - Użytkownik ocenia zgodnie z oczekiwaniami algorytmu na ile przyswoił fiszkę
 - Następnie algorytm pokazuje kolejną fiszkę w ramach sesji nauki
 
-ID: US-009
-Tytuł: Bezpieczny dostęp i autoryzacja
-Opis: Jako zalogowany użytkownik chcę mieć pewność, że moje fiszki nie są dostępne dla innych użytkowników, aby zachować prywatność i bezpieczeństwo danych.
-Kryteria akceptacji:
-
 - Tylko zalogowany użytkownik może wyświetlać, edytować i usuwać swoje fiszki.
 - Nie ma dostępu do fiszek innych użytkowników ani możliwości współdzielenia.
+
+ID: US-009
+Tytuł: Bezpieczny dostęp i uwierzytelnianie
+Opis: Jako użytkownik chcę mieć możliwość rejestracji i logowania się do systemu w sposób zapewniający bezpieczeństwo moich danych. Chcę mieć pewność, że moje fiszki nie są dostępne dla innych użytkowników
+Kryteria akceptacji:
+
+- Logowanie i rejestracja odbywają się na dedykowanych stronach.
+- Logowanie wymaga podania adresu email i hasła.
+- Rejestracja wymaga podania adresu email, hasła i potwierdzenia hasła.
+- Użytkownik NIE MOŻE korzystać z funckji generowania i akceptacji/odrzucania/edycji fiszek bez logowania się do systemu (US-003, US-004, US-005, US-006, 007).
+- Użytkownik NIE MOŻE korzystać z widoków Generator
+- Użytkownik może logować się do systemu poprzez przycisk w prawym górnym rogu.
+- Użytkownik może się wylogować z systemu poprzez przycisk w prawym górnym rogu w głównym @Layout.astro.
+- Nie korzystamy z zewnętrznych serwisów logowania (np. Google, GitHub).
+- Odzyskiwanie hasła powinno być możliwe.
+
+ID: US-010
+
+- Tytuł: Edycja hasła
+  Opis: Jako zalogowany użytkownik chcę mieć możliwość zmiany hasła, aby zapewnić bezpieczeństwo moich danych.
+  Kryteria akceptacji:
+- Użytkownik może zmienić hasło w ustawieniach konta (przycisk Profil) - Po kliknięciu w przycisk "Zmień hasło" otwiera się formularz z polami "Stare hasło", "Nowe hasło" i "Potwierdź nowe hasło".
 
 ## 6. Metryki sukcesu
 

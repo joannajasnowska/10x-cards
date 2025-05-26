@@ -1,0 +1,77 @@
+---
+import { Toaster } from "../components/ui/sonner";
+import Navigation from "../components/Navigation.astro";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  activeNavItem?: "generator" | "flashcards";
+}
+
+const { title, activeNavItem } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Generator fiszek do nauki słownictwa" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <!-- Toast notifications -->
+    <Toaster client:load position="top-center" />
+
+    <div class="layout-wrapper">
+      <Navigation activeItem={activeNavItem} />
+
+      <main class="mx-auto px-6 md:px-12 lg:px-16 max-w-6xl py-8">
+        <slot />
+      </main>
+    </div>
+
+    <div class="fixed bottom-4 right-4">
+      <a
+        href="/logout"
+        class="inline-flex items-center justify-center gap-2 bg-card hover:bg-accent rounded-full p-2 shadow-md transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span class="sr-only">Wyloguj</span>
+      </a>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  html {
+    font-family: system-ui, sans-serif;
+  }
+  code {
+    font-family:
+      Menlo,
+      Monaco,
+      Lucida Console,
+      Liberation Mono,
+      DejaVu Sans Mono,
+      Bitstream Vera Sans Mono,
+      Courier New,
+      monospace;
+  }
+</style>
