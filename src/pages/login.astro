@@ -1,6 +1,25 @@
 ---
 import PublicLayout from "../layouts/PublicLayout.astro";
 import LoginForm from "../components/auth/LoginForm";
+import { createSupabaseServerClient } from "../db/supabase.client";
+
+// Check if user is already logged in
+const supabase = createSupabaseServerClient({
+  cookies: Astro.cookies,
+  headers: Astro.request.headers,
+});
+
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+// If user is already logged in, redirect to generator
+if (user) {
+  return Astro.redirect("/generator");
+}
+
+// Set prerender to false to enable SSR
+export const prerender = false;
 ---
 
 <PublicLayout title="Zaloguj się | 10x Cards">

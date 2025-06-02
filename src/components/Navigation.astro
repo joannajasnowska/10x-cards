@@ -4,6 +4,9 @@ interface Props {
 }
 
 const { activeItem } = Astro.props;
+
+// Get user data from Astro locals
+const user = Astro.locals.user;
 ---
 
 <header class="w-full bg-card border-b border-border sticky top-0 z-50">
@@ -51,7 +54,15 @@ const { activeItem } = Astro.props;
     </nav>
 
     <!-- User menu and mobile button container with fixed width -->
-    <div class="flex items-center w-48 justify-end relative">
+    <div class="flex items-center w-64 justify-end relative">
+      <!-- User email display -->
+      {
+        user && (
+          <span class="text-sm font-medium text-muted-foreground mr-2 truncate max-w-60">
+            {user.email || "Użytkownik"}
+          </span>
+        )
+      }
       <button
         id="user-menu-button"
         class="flex items-center space-x-1 text-muted-foreground hover:text-primary transition-colors"
@@ -196,8 +207,25 @@ const { activeItem } = Astro.props;
 
   // Handle logout
   const logoutButton = document.getElementById("logout-button");
-  logoutButton?.addEventListener("click", () => {
-    // Add logout functionality here
-    console.log("Logout clicked");
+  logoutButton?.addEventListener("click", async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Redirect to login page
+        window.location.href = data.redirect || "/login";
+      } else {
+        console.error("Logout failed:", data.error);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   });
 </script>

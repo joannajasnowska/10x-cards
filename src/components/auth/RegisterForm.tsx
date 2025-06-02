@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import ErrorDisplay from "../ui/ErrorDisplay";
+import { toast } from "sonner";
 
 export default function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -35,14 +36,32 @@ export default function RegisterForm() {
       return;
     }
 
-    // Placeholder for future API integration
     setIsLoading(true);
     try {
-      // Mock successful registration for now
-      console.log("Registration attempt:", { email, password });
-      // Will be replaced with actual API call
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, passwordConfirm: confirmPassword }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Wystąpił błąd podczas rejestracji");
+      }
+
+      // Show success toast
+      toast.success("Rejestracja zakończona pomyślnie!");
+
+      // Redirect to the specified page (Generator)
+      if (data.redirect) {
+        window.location.href = data.redirect;
+      }
     } catch (err) {
-      setError("Wystąpił błąd podczas rejestracji. Spróbuj ponownie.");
+      const errorMessage = err instanceof Error ? err.message : "Wystąpił błąd podczas rejestracji. Spróbuj ponownie.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

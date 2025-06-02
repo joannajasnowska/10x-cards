@@ -1,4 +1,4 @@
-import { DEFAULT_USER_ID, type SupabaseClient } from "../../db/supabase.client";
+import { type SupabaseClient } from "../../db/supabase.client";
 import type {
   InitiateGenerationCommand,
   InitiateGenerationResponseDTO,
@@ -21,13 +21,18 @@ export class GenerationsService {
     return createHash("md5").update(text).digest("hex");
   }
 
-  private async createGenerationRecord(sourceText: string, sourceTextHash: string, sourceTextLength: number) {
+  private async createGenerationRecord(
+    sourceText: string,
+    sourceTextHash: string,
+    sourceTextLength: number,
+    userId: string
+  ) {
     const startDate = new Date().toISOString();
 
     const { data: generation, error: insertError } = await this.supabase
       .from("generations")
       .insert({
-        user_id: DEFAULT_USER_ID,
+        user_id: userId,
         model: DEFAULT_AI_MODEL,
         source_text_hash: sourceTextHash,
         source_text_length: sourceTextLength,
@@ -72,11 +77,11 @@ export class GenerationsService {
     }
   }
 
-  async initiateGeneration(command: InitiateGenerationCommand): Promise<InitiateGenerationResponseDTO> {
+  async initiateGeneration(command: InitiateGenerationCommand, userId: string): Promise<InitiateGenerationResponseDTO> {
     const sourceTextHash = this.calculateTextHash(command.source_text);
     const sourceTextLength = command.source_text.length;
 
-    const generation = await this.createGenerationRecord(command.source_text, sourceTextHash, sourceTextLength);
+    const generation = await this.createGenerationRecord(command.source_text, sourceTextHash, sourceTextLength, userId);
 
     try {
       const flashcardProposals = await this.aiService.generateFlashcardProposals(command.source_text, DEFAULT_AI_MODEL);
@@ -97,7 +102,7 @@ export class GenerationsService {
         model: DEFAULT_AI_MODEL,
         source_text_hash: sourceTextHash,
         source_text_length: sourceTextLength,
-        user_id: DEFAULT_USER_ID,
+        user_id: userId,
       });
 
       throw error;

@@ -1,6 +1,20 @@
 ---
 import PublicLayout from "../layouts/PublicLayout.astro";
 import RegisterForm from "../components/auth/RegisterForm";
+import { createSupabaseServerClient } from "../db/supabase.client";
+
+// Check if user is already logged in
+const supabase = createSupabaseServerClient({
+  cookies: Astro.cookies,
+  headers: Astro.request.headers,
+});
+
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+// Set prerender to false to enable SSR
+export const prerender = false;
 ---
 
 <PublicLayout title="Zarejestruj się | 10x Cards">

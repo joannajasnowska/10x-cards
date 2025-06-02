@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import ErrorDisplay from "../ui/ErrorDisplay";
+import { toast } from "sonner";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -24,14 +25,32 @@ export default function LoginForm() {
       return;
     }
 
-    // Placeholder for future API integration
     setIsLoading(true);
     try {
-      // Mock successful login for now
-      console.log("Login attempt:", { email, password });
-      // Will be replaced with actual API call
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Wystąpił błąd podczas logowania");
+      }
+
+      // Show success toast
+      toast.success("Zalogowano pomyślnie!");
+
+      // Redirect to the specified page (Generator)
+      if (data.redirect) {
+        window.location.href = data.redirect;
+      }
     } catch (err) {
-      setError("Wystąpił błąd podczas logowania. Spróbuj ponownie.");
+      const errorMessage = err instanceof Error ? err.message : "Wystąpił błąd podczas logowania. Spróbuj ponownie.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }

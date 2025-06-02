@@ -34,9 +34,11 @@ const { title, activeNavItem } = Astro.props;
     </div>
 
     <div class="fixed bottom-4 right-4">
-      <a
-        href="/logout"
+      <button
+        id="floating-logout-button"
         class="inline-flex items-center justify-center gap-2 bg-card hover:bg-accent rounded-full p-2 shadow-md transition-colors"
+        aria-label="Wyloguj"
+        type="button"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -54,8 +56,32 @@ const { title, activeNavItem } = Astro.props;
           <line x1="21" y1="12" x2="9" y2="12"></line>
         </svg>
         <span class="sr-only">Wyloguj</span>
-      </a>
+      </button>
     </div>
+
+    <script>
+      document.getElementById("floating-logout-button")?.addEventListener("click", async () => {
+        try {
+          const response = await fetch("/api/auth/logout", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            // Redirect to login page
+            window.location.href = data.redirect || "/login";
+          } else {
+            console.error("Logout failed:", data.error);
+          }
+        } catch (error) {
+          console.error("Logout error:", error);
+        }
+      });
+    </script>
   </body>
 </html>
 

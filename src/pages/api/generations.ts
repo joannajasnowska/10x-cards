@@ -17,6 +17,24 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const { supabase } = locals;
 
+    // Get authenticated user from session
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "You must be logged in to generate flashcards",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Parse and validate the request body
     const body = await request.json();
     const validationResult = GenerationRequestSchema.safeParse(body);
@@ -37,7 +55,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const command = validationResult.data as InitiateGenerationCommand;
     const generationsService = new GenerationsService(supabase);
 
-    const result = await generationsService.initiateGeneration(command);
+    // Pass the authenticated user's ID to the service
+    const result = await generationsService.initiateGeneration(command, user.id);
 
     return new Response(JSON.stringify(result), {
       status: 201,

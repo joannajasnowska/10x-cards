@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { supabaseClient, DEFAULT_USER_ID } from "@/db/supabase.client";
+import { supabaseClient } from "@/db/supabase.client";
 
 // Schema for flashcard update
 const updateFlashcardSchema = z.object({
@@ -13,7 +13,7 @@ const updateFlashcardSchema = z.object({
 export const prerender = false;
 
 // GET handler for retrieving a single flashcard
-export const GET: APIRoute = async ({ params }) => {
+export const GET: APIRoute = async ({ params, locals }) => {
   try {
     const { id } = params;
 
@@ -23,6 +23,25 @@ export const GET: APIRoute = async ({ params }) => {
       });
     }
 
+    // Get authenticated user from session
+    const { supabase } = locals;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "You must be logged in to access flashcards",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const flashcardId = Number(id);
 
     // Retrieve the flashcard
@@ -30,7 +49,7 @@ export const GET: APIRoute = async ({ params }) => {
       .from("flashcards")
       .select("*")
       .eq("id", flashcardId)
-      .eq("user_id", DEFAULT_USER_ID)
+      .eq("user_id", user.id)
       .single();
 
     if (error) {
@@ -63,7 +82,7 @@ export const GET: APIRoute = async ({ params }) => {
 };
 
 // PUT handler for updating a flashcard
-export const PUT: APIRoute = async ({ request, params }) => {
+export const PUT: APIRoute = async ({ request, params, locals }) => {
   try {
     const { id } = params;
 
@@ -71,6 +90,25 @@ export const PUT: APIRoute = async ({ request, params }) => {
       return new Response(JSON.stringify({ error: "Invalid flashcard ID" }), {
         status: 400,
       });
+    }
+
+    // Get authenticated user from session
+    const { supabase } = locals;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "You must be logged in to update flashcards",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     const flashcardId = Number(id);
@@ -84,7 +122,7 @@ export const PUT: APIRoute = async ({ request, params }) => {
       .from("flashcards")
       .update(updateData)
       .eq("id", flashcardId)
-      .eq("user_id", DEFAULT_USER_ID) // Ensure user can only update their own flashcards
+      .eq("user_id", user.id) // Ensure user can only update their own flashcards
       .select()
       .single();
 
@@ -118,7 +156,7 @@ export const PUT: APIRoute = async ({ request, params }) => {
 };
 
 // DELETE handler for deleting a flashcard
-export const DELETE: APIRoute = async ({ params }) => {
+export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
     const { id } = params;
 
@@ -128,14 +166,29 @@ export const DELETE: APIRoute = async ({ params }) => {
       });
     }
 
+    // Get authenticated user from session
+    const { supabase } = locals;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "You must be logged in to delete flashcards",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const flashcardId = Number(id);
 
     // Delete the flashcard
-    const { error } = await supabaseClient
-      .from("flashcards")
-      .delete()
-      .eq("id", flashcardId)
-      .eq("user_id", DEFAULT_USER_ID); // Ensure user can only delete their own flashcards
+    const { error } = await supabaseClient.from("flashcards").delete().eq("id", flashcardId).eq("user_id", user.id); // Ensure user can only delete their own flashcards
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {

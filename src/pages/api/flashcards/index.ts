@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { supabaseClient, DEFAULT_USER_ID } from "@/db/supabase.client";
+import { supabaseClient } from "@/db/supabase.client";
 import type { FlashcardsListResponseDTO } from "@/types";
 
 // Schema for query parameters
@@ -26,33 +26,54 @@ const createFlashcardsCommandSchema = z.object({
 
 export const prerender = false;
 
-// GET handler for listing flashcards
-export const GET: APIRoute = async ({ request }) => {
+// GET handler for flashcards listing
+export const GET: APIRoute = async ({ request, locals }) => {
   try {
-    // Parse query parameters
     const url = new URL(request.url);
     const params = Object.fromEntries(url.searchParams.entries());
 
-    const { page, limit, filter, sort, order } = flashcardsQuerySchema.parse(params);
+    // Validate and parse query parameters
+    const validatedParams = flashcardsQuerySchema.parse(params);
+    const { page, limit, filter, sort, order } = validatedParams;
 
-    // Calculate offset
-    const offset = (page - 1) * limit;
+    // Get authenticated user from session
+    const { supabase } = locals;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "You must be logged in to access flashcards",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Calculate pagination
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
 
     // Build query
     let query = supabaseClient
       .from("flashcards")
       .select("*", { count: "exact" })
-      .eq("user_id", DEFAULT_USER_ID)
+      .eq("user_id", user.id)
       .order(sort, { ascending: order === "asc" })
-      .range(offset, offset + limit - 1);
+      .range(from, to);
 
-    // Apply search filter if provided
+    // Apply text filtering if provided
     if (filter) {
       query = query.or(`front.ilike.%${filter}%,back.ilike.%${filter}%`);
     }
 
     // Execute query
-    const { data, count, error } = await query;
+    const { data, error, count } = await query;
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {
@@ -88,17 +109,36 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 // POST handler for creating flashcards
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const body = await request.json();
 
     // Validate request body
     const { flashcards } = createFlashcardsCommandSchema.parse(body);
 
+    // Get authenticated user from session
+    const { supabase } = locals;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "You must be logged in to create flashcards",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     // Add user_id to each flashcard
     const flashcardsWithUser = flashcards.map((flashcard) => ({
       ...flashcard,
-      user_id: DEFAULT_USER_ID,
+      user_id: user.id,
     }));
 
     // Insert flashcards
