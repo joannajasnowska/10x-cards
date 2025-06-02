@@ -45,7 +45,6 @@ export default function PasswordChangeForm() {
     setIsLoading(true);
     try {
       // Mock successful password change for now
-      console.log("Password change attempt:", { currentPassword, newPassword });
       // Will be replaced with actual API call
 
       // Simulate success response

@@ -65,10 +65,27 @@ export class OpenRouterLogger {
 
     // Remove sensitive data
     const sanitized = { ...context };
-    const sensitiveKeys = ["apiKey", "authorization", "password", "token"];
+    const sensitiveKeys = [
+      "apiKey",
+      "authorization",
+      "password",
+      "token",
+      "email",
+      "user",
+      "userData",
+      "auth",
+      "credentials",
+      "userId",
+      "refreshToken",
+      "accessToken",
+    ];
 
     Object.keys(sanitized).forEach((key) => {
-      if (sensitiveKeys.includes(key.toLowerCase())) {
+      if (
+        sensitiveKeys.includes(key.toLowerCase()) ||
+        key.toLowerCase().includes("password") ||
+        key.toLowerCase().includes("token")
+      ) {
         sanitized[key] = "[REDACTED]";
       }
     });

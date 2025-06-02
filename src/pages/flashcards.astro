@@ -1,6 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import FlashcardsPage from "../components/flashcards/FlashcardsPage";
+
+// Set prerender to false to ensure middleware runs for authentication check
+export const prerender = false;
 ---
 
 <Layout title="Moje Fiszki" showNavigation={true} activeNavItem="flashcards">

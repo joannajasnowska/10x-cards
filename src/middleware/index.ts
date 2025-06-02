@@ -2,14 +2,7 @@ import { defineMiddleware } from "astro:middleware";
 import { createSupabaseServerClient } from "../db/supabase.client";
 
 // Public paths that don't require authentication
-const PUBLIC_PATHS = [
-  "/login",
-  "/register",
-  "/reset-password",
-  "/api/auth/login",
-  "/api/auth/register",
-  "/api/auth/reset-password",
-];
+const PUBLIC_PATHS = ["/login", "/register", "/api/auth/login", "/api/auth/register"];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
   // Initialize supabase client for this request

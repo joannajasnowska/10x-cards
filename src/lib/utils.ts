@@ -8,3 +8,17 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+/**
+ * Sanitizes user data for client-side consumption
+ * Ensures sensitive data is not exposed in browser console logs
+ */
+export function sanitizeUserData(userData: any) {
+  if (!userData) return null;
+
+  // Create a new object with only safe properties
+  return {
+    isAuthenticated: true,
+    username: userData.email ? userData.email.split("@")[0] : "User",
+  };
+}

@@ -9,6 +9,9 @@
 - **Frontend:** Astro 5, React 19, TypeScript 5, Tailwind CSS 4, Shadcn/ui
 - **Backend:** Supabase (PostgreSQL, user authentication, API support)
 - **AI Integration:** Utilizes Openrouter.ai for communication with LLM models
+- **Testing:**
+  - **Unit & Component:** Vitest, React Testing Library, MSW (Mock Service Worker), Storybook
+  - **End-to-End:** Playwright for cross-browser testing, Allure for reporting
 - **CI/CD & Hosting:** GitHub Actions and DigitalOcean
 - **Node Version:** 22.14.0 (as specified in .nvmrc)
 

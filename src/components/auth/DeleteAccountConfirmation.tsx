@@ -31,7 +31,6 @@ export default function DeleteAccountConfirmation() {
     setIsLoading(true);
     try {
       // Mock successful account deletion for now
-      console.log("Account deletion confirmed with password:", password);
       // Will be replaced with actual API call
 
       // Redirect to home page would happen after successful deletion

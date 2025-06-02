@@ -92,9 +92,6 @@ export default function LoginForm() {
             >
               Hasło
             </label>
-            <a href="/reset-password" className="text-xs text-primary hover:underline">
-              Zapomniałeś hasła?
-            </a>
           </div>
           <Input
             id="password"

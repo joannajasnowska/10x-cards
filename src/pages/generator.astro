@@ -1,6 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import GeneratorView from "../components/views/GeneratorView";
+
+// Set prerender to false to ensure middleware runs for authentication check
+export const prerender = false;
 ---
 
 <Layout title="Generator Fiszek" showNavigation={true} activeNavItem="generator">
