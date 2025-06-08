@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Unit testing with Vitest and React Testing Library
 globs:
 alwaysApply: false
