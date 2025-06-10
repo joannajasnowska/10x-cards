@@ -1,4 +1,4 @@
-import { Page, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 import BasePage from "./BasePage";
 
 /**
@@ -7,10 +7,6 @@ import BasePage from "./BasePage";
 export default class HomePage extends BasePage {
   // Locators
   private readonly heading = "h1";
-
-  constructor(page: Page) {
-    super(page);
-  }
 
   /**
    * Navigate to the home page

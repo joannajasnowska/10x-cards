@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { GenerationsService } from "./generations.service";
 import type { SupabaseClient } from "@/db/supabase.client.ts";
+import type { GenerationFlashcardProposalDTO } from "../../types";
 
 // Mock dependencies
 vi.mock("../../db/supabase.client", () => ({
@@ -27,16 +28,18 @@ vi.mock("crypto", () => {
   };
 });
 
+type MockFunction = ReturnType<typeof vi.fn>;
+
 describe("GenerationsService", () => {
   let service: GenerationsService;
   let mockSupabase: SupabaseClient;
-  let mockFrom: any;
-  let mockInsert: any;
-  let mockUpdate: any;
-  let mockSelect: any;
-  let mockSingle: any;
-  let mockEq: any;
-  let originalCalculateTextHash: any;
+  let mockFrom: MockFunction;
+  let mockInsert: MockFunction;
+  let mockUpdate: MockFunction;
+  let mockSelect: MockFunction;
+  let mockSingle: MockFunction;
+  let mockEq: MockFunction;
+  let originalCalculateTextHash: (text: string) => string;
 
   beforeEach(() => {
     // Reset mocks
@@ -68,20 +71,20 @@ describe("GenerationsService", () => {
 
     mockSupabase = {
       from: mockFrom,
-    };
+    } as unknown as SupabaseClient;
 
     // Initialize service with mocked dependencies
     service = new GenerationsService(mockSupabase);
 
     // Mock the calculateTextHash method
-    originalCalculateTextHash = (service as any).calculateTextHash;
-    (service as any).calculateTextHash = vi.fn().mockReturnValue("mocked-hash");
+    originalCalculateTextHash = service["calculateTextHash"].bind(service);
+    service["calculateTextHash"] = vi.fn().mockReturnValue("mocked-hash");
   });
 
   afterEach(() => {
     // Restore original method
     if (originalCalculateTextHash) {
-      (service as any).calculateTextHash = originalCalculateTextHash;
+      service["calculateTextHash"] = originalCalculateTextHash;
     }
   });
 
@@ -97,9 +100,9 @@ describe("GenerationsService", () => {
         start_date: "2023-01-01T00:00:00Z",
       };
 
-      const mockFlashcardProposals = [
-        { id: 1, front: "Question 1", back: "Answer 1" },
-        { id: 2, front: "Question 2", back: "Answer 2" },
+      const mockFlashcardProposals: GenerationFlashcardProposalDTO[] = [
+        { front: "Question 1", back: "Answer 1", source: "ai-complete" },
+        { front: "Question 2", back: "Answer 2", source: "ai-complete" },
       ];
 
       // Mock Supabase responses
@@ -116,7 +119,7 @@ describe("GenerationsService", () => {
       expect(mockFrom).toHaveBeenCalledWith("generations");
       expect(mockInsert).toHaveBeenCalled();
 
-      expect((service as any).calculateTextHash).toHaveBeenCalledWith(sourceText);
+      expect(service["calculateTextHash"]).toHaveBeenCalledWith(sourceText);
 
       expect(mockGenerateFlashcardProposals).toHaveBeenCalledWith(sourceText, "openai/gpt-4o-mini");
 
@@ -157,7 +160,7 @@ describe("GenerationsService", () => {
   describe("private methods", () => {
     it("should calculate text hash correctly", async () => {
       // Restore original method for this test
-      (service as any).calculateTextHash = originalCalculateTextHash;
+      service["calculateTextHash"] = originalCalculateTextHash;
 
       // We can't easily test the original method without mocking the crypto module
       // This test is skipped in favor of mocking the method in other tests
@@ -174,11 +177,8 @@ describe("GenerationsService", () => {
       const mockGeneration = { id: 1 };
       mockSingle.mockResolvedValue({ data: mockGeneration, error: null });
 
-      // Access private method
-      const createGenerationRecord = (service as any).createGenerationRecord.bind(service);
-
       // Act
-      const result = await createGenerationRecord(sourceText, sourceTextHash, sourceTextLength, userId);
+      const result = await service["createGenerationRecord"](sourceText, sourceTextHash, sourceTextLength, userId);
 
       // Assert
       expect(result).toEqual(mockGeneration);
@@ -201,25 +201,22 @@ describe("GenerationsService", () => {
 
       mockSingle.mockResolvedValue({ data: null, error: { message: "DB error" } });
 
-      // Access private method
-      const createGenerationRecord = (service as any).createGenerationRecord.bind(service);
-
       // Act & Assert
-      await expect(createGenerationRecord(sourceText, sourceTextHash, sourceTextLength, userId)).rejects.toThrow(
-        "Failed to create generation record: DB error"
-      );
+      await expect(
+        service["createGenerationRecord"](sourceText, sourceTextHash, sourceTextLength, userId)
+      ).rejects.toThrow("Failed to create generation record: DB error");
     });
 
     it("should update generation record successfully", async () => {
       // Arrange
       const generationId = 1;
-      const flashcardProposals = [{ id: 1, front: "Q", back: "A" }];
+      const flashcardProposals: GenerationFlashcardProposalDTO[] = [{ front: "Q", back: "A", source: "ai-complete" }];
       const startDate = "2023-01-01T00:00:00Z";
 
       mockEq.mockResolvedValue({ error: null });
 
       // Access private method
-      const updateGenerationRecord = (service as any).updateGenerationRecord.bind(service);
+      const updateGenerationRecord = service["updateGenerationRecord"].bind(service);
 
       // Act
       await updateGenerationRecord(generationId, flashcardProposals, startDate);
@@ -239,13 +236,13 @@ describe("GenerationsService", () => {
     it("should throw error when update generation record fails", async () => {
       // Arrange
       const generationId = 1;
-      const flashcardProposals = [{ id: 1, front: "Q", back: "A" }];
+      const flashcardProposals: GenerationFlashcardProposalDTO[] = [{ front: "Q", back: "A", source: "ai-complete" }];
       const startDate = "2023-01-01T00:00:00Z";
 
       mockEq.mockResolvedValue({ error: { message: "Update error" } });
 
       // Access private method
-      const updateGenerationRecord = (service as any).updateGenerationRecord.bind(service);
+      const updateGenerationRecord = service["updateGenerationRecord"].bind(service);
 
       // Act & Assert
       await expect(updateGenerationRecord(generationId, flashcardProposals, startDate)).rejects.toThrow(
