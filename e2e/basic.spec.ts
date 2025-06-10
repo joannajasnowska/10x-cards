@@ -12,6 +12,5 @@ test.describe("Basic functionality test", () => {
     // Find an element and verify text using a more reliable selector
     const headingText = await page.locator("h1").first().textContent();
     expect(headingText).toBeTruthy();
-    console.log("Found heading text:", headingText);
   });
 });

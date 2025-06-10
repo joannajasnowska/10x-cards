@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = createSupabaseServerClient({ cookies, headers: request.headers });
 
   // Register the user without email verification (as per requirements)
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
