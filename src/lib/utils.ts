@@ -9,11 +9,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+interface UserData {
+  email?: string;
+  [key: string]: unknown;
+}
+
 /**
  * Sanitizes user data for client-side consumption
  * Ensures sensitive data is not exposed in browser console logs
  */
-export function sanitizeUserData(userData: any) {
+export function sanitizeUserData(userData: UserData | null) {
   if (!userData) return null;
 
   // Create a new object with only safe properties

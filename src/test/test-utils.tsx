@@ -11,8 +11,8 @@ const customRender = (ui: ReactElement, options?: Omit<RenderOptions, "wrapper">
   render(ui, { wrapper: AllProviders, ...options });
 
 // Create a mock function with proper typing
-const createMockFn = <T extends (...args: any[]) => any>() => {
-  return vi.fn() as jest.MockedFunction<T>;
+const createMockFn = <TArgs extends unknown[] = [], TReturn = void>() => {
+  return vi.fn() as jest.MockedFunction<(...args: TArgs) => TReturn>;
 };
 
 // Re-export everything from testing-library
