@@ -8,12 +8,9 @@
 
   - `/login` – Strona logowania zawierająca formularz logowania.
   - `/register` – Strona rejestracji z formularzem rejestracyjnym.
-  - `/reset-password` – Strona do inicjowania procesu odzyskiwania hasła (wprowadzenie adresu email) oraz ewentualna strona potwierdzenia resetowania.
-  - `/change-password` – Strona do zmiany hasła użytkownika, zawierająca formularz z polami: stare hasło, nowe hasło, potwierdzenie nowego hasła.
-  - `/delete-account` – Strona (lub modal) potwierdzająca usunięcie konta użytkownika.
 
 - **Layouty:**
-  - `PublicLayout` – Layout dla użytkowników anonimowych (strony takie jak logowanie, rejestracja, reset hasła). Brak elementów specyficznych dla autoryzacji.
+  - `PublicLayout` – Layout dla użytkowników anonimowych (strony takie jak logowanie, rejestracja). Brak elementów specyficznych dla autoryzacji.
   - `PrivateLayout` – Layout dla użytkowników zalogowanych, zawierający elementy nawigacyjne (przycisk wylogowania, profil użytkownika) oraz dodatkowe zabezpieczenia przy użyciu middleware.
 
 ### Komponenty i formularze (Client-side React)
@@ -22,9 +19,7 @@
 
   - `LoginForm` – Komponent odpowiedzialny za logowanie; zawiera pola: email, hasło oraz przycisk submit.
   - `RegisterForm` – Komponent obsługujący rejestrację; zawiera pola: email, hasło, potwierdzenie hasła.
-  - `PasswordRecoveryForm` – Komponent inicjujący proces odzyskiwania hasła, przyjmujący adres email użytkownika.
-  - `PasswordChangeForm` – Komponent służący do zmiany hasła przez użytkownika.
-  - `DeleteAccountConfirmation` – Komponent umożliwiający usunięcie konta użytkownika po potwierdzeniu.
+  
 
 - **Walidacja i komunikaty błędów:**
   - Walidacja na poziomie frontendu (sprawdzanie formatu email, minimalnej długości hasła, zgodności haseł w rejestracji).
@@ -32,7 +27,7 @@
 
 ### Integracja z backendem i nawigacją
 
-- Formularze będą wysyłały zapytania do odpowiednich endpointów API (np. `/api/auth/login`, `/api/auth/signup`, `/api/auth/reset-password`) przy użyciu fetch lub innej biblioteki HTTP (np. axios).
+- Formularze będą wysyłały zapytania do odpowiednich endpointów API (np. `/api/auth/login`, `/api/auth/signup`) przy użyciu fetch lub innej biblioteki HTTP (np. axios).
 - Po udanej operacji (rejestracja/logowanie) użytkownik zostanie przekierowany do strony głównej lub dashboardu.
 - Utrzymywanie stanu sesji na froncie (przechowywanie tokena w ciasteczkach lub w kontekście aplikacji) będzie kluczowe dla zarządzania widokami auth i non-auth.
 
@@ -45,10 +40,7 @@
   - `POST /api/auth/signup` – Rejestracja użytkownika. Przyjmuje dane: email oraz hasło. Wykorzystuje metodę Supabase `signUp`.
   - `POST /api/auth/login` – Logowanie użytkownika. Przyjmuje dane: email, hasło. Zwraca token sesji lub odpowiedni komunikat błędu.
   - `POST /api/auth/logout` – Wylogowanie użytkownika; czyści sesję poprzez `signOut`.
-  - `POST /api/auth/reset-password` – Inicjuje proces odzyskiwania hasła. Weryfikuje, czy podany email istnieje, a następnie wysyła link resetujący.
-  - Opcjonalnie: `POST /api/auth/confirm-reset` – Potwierdza zmianę hasła poprzez weryfikację tokena i aktualizację hasła.
-  - `POST /api/auth/change-password` – Edycja hasła użytkownika; przyjmuje dane: stare hasło, nowe hasło, potwierdzenie nowego hasła. Weryfikuje poprawność starego hasła i aktualizuje hasło w systemie.
-  - `POST /api/auth/delete-account` – Usunięcie konta użytkownika; usuwa konto z systemu po uprzednim potwierdzeniu.
+ 
 
 - **Modele danych:**
   - Model użytkownika zgodny z danymi zwracanymi przez Supabase Auth.
@@ -84,9 +76,7 @@
     - Endpoint `/api/auth/login` korzysta z `supabase.auth.signIn` (lub `signInWithPassword`) w celu autoryzacji, a w odpowiedzi zwraca token sesji.
   - **Wylogowanie:**
     - Endpoint `/api/auth/logout` wywołuje metodę `supabase.auth.signOut`, usuwając sesję użytkownika.
-  - **Resetowanie hasła:**
-    - Endpoint `/api/auth/reset-password` wywołuje funkcję Supabase do wysłania e-maila resetującego hasło (np. `supabase.auth.api.resetPasswordForEmail`).
-    - (Opcjonalnie) Endpoint potwierdzający reset: `POST /api/auth/confirm-reset` - weryfikuje token i aktualizuje hasło.
+  
 
 ### Bezpieczeństwo i middleware
 
@@ -100,7 +90,7 @@ Implementacja modułu autentykacji w oparciu o Supabase Auth integruje frontend 
 Kluczowe komponenty rozwiązania:
 
 - Astro pages dla procesów logowania, rejestracji i resetowania hasła.
-- React komponenty (`LoginForm`, `RegisterForm`, `PasswordRecoveryForm`) odpowiedzialne za interaktywną walidację i obsługę formularzy.
+- React komponenty (`LoginForm`, `RegisterForm`) odpowiedzialne za interaktywną walidację i obsługę formularzy.
 - Dedykowane endpointy API w `src/pages/api/auth` do komunikacji z Supabase Auth.
 - Middleware oraz konfiguracja server-side renderingu do ochrony tras wymagających autentykacji.
 
