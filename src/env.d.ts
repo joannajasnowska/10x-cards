@@ -1,12 +1,13 @@
 /// <reference types="astro/client" />
 /// <reference types="vite/client" />
 
-import type { SupabaseClient } from "./db/supabase.client";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "./db/database.types";
 
 declare global {
   namespace App {
     interface Locals {
-      supabase: SupabaseClient;
+      supabase: SupabaseClient<Database>;
       user?: {
         id: string;
         email: string | null;

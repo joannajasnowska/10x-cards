@@ -39,63 +39,12 @@ export interface ApiResponse {
 
 export interface OpenRouterConfig {
   apiKey: string;
-  baseUrl: string;
-}
-
-export interface OpenRouterModelParameters {
-  temperature?: number;
-  max_tokens?: number;
-  top_p?: number;
-  frequency_penalty?: number;
-  presence_penalty?: number;
-}
-
-export interface OpenRouterMessage {
-  role: "system" | "user" | "assistant";
-  content: string;
-}
-
-export interface OpenRouterRequest {
-  model: string;
-  messages: OpenRouterMessage[];
-  temperature?: number;
-  max_tokens?: number;
-  top_p?: number;
-  frequency_penalty?: number;
-  presence_penalty?: number;
-  stream?: boolean;
-}
-
-export interface OpenRouterResponse {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  choices: {
-    index: number;
-    message: {
-      role: string;
-      content: string;
-    };
-    finish_reason: string;
-  }[];
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-}
-
-export interface OpenRouterError {
-  error: {
-    message: string;
-    type: string;
-    code: string;
-  };
-}
-
-export interface OpenRouterServiceDependencies {
-  supabase: SupabaseClient;
+  modelName: string;
+  modelParameters?: Partial<ModelParameters>;
+  systemMessage?: string;
+  endpoint?: string;
+  timeout?: number;
+  retries?: number;
 }
 
 export interface ApiClient {

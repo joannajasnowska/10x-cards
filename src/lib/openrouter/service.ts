@@ -11,8 +11,6 @@ import {
 } from "./types";
 import { apiErrorSchema, modelConfigSchema, openRouterConfigSchema, requestPayloadSchema } from "./schemas";
 import { OpenRouterLogger } from "./logger";
-import type { OpenRouterRequest, OpenRouterResponse, OpenRouterError } from "./types";
-import type { GenerationFlashcardProposalDTO } from "../../types";
 
 export class OpenRouterService {
   private readonly apiClient: ApiClient;
@@ -28,13 +26,7 @@ export class OpenRouterService {
   private currentUserMessage?: string;
   private currentResponseFormat: RequestPayload["response_format"];
 
-  private supabase: SupabaseClient;
-  private config: OpenRouterConfig;
-
   constructor(supabase: SupabaseClient, config: OpenRouterConfig) {
-    this.supabase = supabase;
-    this.config = config;
-
     this.logger.debug("Initializing OpenRouter service", { config });
 
     try {
@@ -419,79 +411,5 @@ export class OpenRouterService {
 
     // Validate and return the error
     return apiErrorSchema.parse(apiError);
-  }
-
-  async generateFlashcards(topic: string, count = 10): Promise<GenerationFlashcardProposalDTO[]> {
-    const request: OpenRouterRequest = {
-      model: "openai/gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: `You are a flashcard generation assistant. Your task is to create educational flashcards about the given topic.
-Each flashcard should have a front (question) and back (answer) side.
-The front should be a clear, concise question or prompt.
-The back should contain a complete, accurate answer. Focus on important facts, definitions, concepts, and relationships.
-
-Follow these rules:
-- Create exactly ${count} flashcards
-- Front side should be max 200 characters
-- Back side should be max 500 characters
-- Focus on key concepts, definitions, and important facts
-- Make questions clear and unambiguous
-- Ensure answers are accurate and complete
-- Avoid overly complex or compound questions
-- Format consistently across all flashcards
-
-Your response must be a valid JSON object with a "flashcards" array containing the flashcard objects.
-Each flashcard object should have "front" and "back" properties.
-Do not include any other text or explanation in your response, only the JSON object.`,
-        },
-        {
-          role: "user",
-          content: `Generate ${count} flashcards about: ${topic}`,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-      top_p: 1.0,
-    };
-
-    try {
-      const response = await fetch(`${this.config.baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.config.apiKey}`,
-        },
-        body: JSON.stringify(request),
-      });
-
-      if (!response.ok) {
-        const errorData: OpenRouterError = await response.json();
-        throw new Error(`OpenRouter API error: ${errorData.error.message}`);
-      }
-
-      const data: OpenRouterResponse = await response.json();
-      const content = data.choices[0]?.message?.content;
-
-      if (!content) {
-        throw new Error("No content received from OpenRouter API");
-      }
-
-      // Parse the JSON response
-      const parsedContent = JSON.parse(content);
-
-      if (!parsedContent.flashcards || !Array.isArray(parsedContent.flashcards)) {
-        throw new Error("Invalid response format from OpenRouter API");
-      }
-
-      return parsedContent.flashcards.map((card: { front: string; back: string }) => ({
-        front: card.front,
-        back: card.back,
-      }));
-    } catch (error) {
-      console.error("Error generating flashcards:", error);
-      throw new Error("Failed to generate flashcards");
-    }
   }
 }
