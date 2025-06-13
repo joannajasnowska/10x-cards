@@ -11,8 +11,8 @@ export const GET: APIRoute = async ({ request, cookies }) => {
   return new Response(
     JSON.stringify({
       isAuthenticated: !!user,
-      // Only return minimal user info if needed for UI personalization
-      userEmail: user?.email ? user.email.split("@")[0] : null,
+      // Return full email for proper user data synchronization
+      userEmail: user?.email || null,
     }),
     { status: 200 }
   );

@@ -194,11 +194,13 @@ const user = Astro.locals.user;
 
   // Close the dropdown when clicking outside
   document.addEventListener("click", (event) => {
+    const target = event.target;
     if (
       userMenuButton &&
       userDropdown &&
-      !userMenuButton.contains(event.target as Node) &&
-      !userDropdown.contains(event.target as Node)
+      target &&
+      !userMenuButton.contains(target) &&
+      !userDropdown.contains(target)
     ) {
       userMenuButton.setAttribute("aria-expanded", "false");
       userDropdown.classList.add("hidden");

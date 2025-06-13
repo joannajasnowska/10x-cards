@@ -3,14 +3,20 @@ import { createSupabaseServerClient } from "../db/supabase.client";
 
 // Public paths that don't require authentication
 const PUBLIC_PATHS = [
-  // Server-Rendered Astro Pages
+  // Server-Rendered Astro Pages (current implementation)
   "/login",
   "/register",
+  // Alternative auth pages (documentation standard)
+  "/auth/login",
+  "/auth/register",
+  "/auth/reset-password",
   // Auth API endpoints
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/logout",
   "/api/auth/status",
+  "/api/auth/reset-password",
+  "/api/auth/refresh",
 ];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {

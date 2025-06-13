@@ -1,50 +1,123 @@
 import type { APIRoute } from "astro";
 import { createSupabaseServerClient } from "../../../db/supabase.client";
-import { loginSchema } from "../../../schemas/auth";
-import { ZodError } from "zod";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-    // Validate input using Zod schema
-    const validatedData = loginSchema.parse(body);
-    const { email, password } = validatedData;
+    // Validation
+    if (!email || !password) {
+      return new Response(
+        JSON.stringify({
+          error: "Email i hasło są wymagane",
+          field: !email ? "email" : "password",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
     const supabase = createSupabaseServerClient({ cookies, headers: request.headers });
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      let errorMessage = "Wystąpił błąd podczas logowania";
+      let errorMessage = "Uwierzytelnienie nie powiodło się";
+      let field = "general";
 
-      // Provide more specific error messages based on error code
       if (error.message.includes("Invalid login credentials")) {
-        errorMessage = "Nieprawidłowy adres email lub hasło";
+        errorMessage = "Nieprawidłowy email lub hasło";
+        field = "credentials";
+      } else if (error.message.includes("Email not confirmed")) {
+        errorMessage = "Proszę potwierdzić swój adres email";
+        field = "email";
+      } else if (error.message.includes("Too many requests")) {
+        errorMessage = "Zbyt wiele prób logowania. Spróbuj ponownie później";
+        field = "rate_limit";
       }
 
-      return new Response(JSON.stringify({ error: errorMessage }), { status: 400 });
+      return new Response(
+        JSON.stringify({
+          error: errorMessage,
+          field,
+          code: error.message,
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
-    // Return success response with redirect URL - without exposing sensitive user data
+    if (!data.user || !data.session) {
+      return new Response(
+        JSON.stringify({
+          error: "Logowanie nie powiodło się - nie utworzono sesji",
+          field: "general",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Set auth cookies
+    cookies.set("sb-access-token", data.session.access_token, {
+      path: "/",
+      maxAge: 60 * 60, // 1 hour
+      httpOnly: true,
+      secure: import.meta.env.PROD,
+      sameSite: "lax",
+    });
+
+    cookies.set("sb-refresh-token", data.session.refresh_token, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      httpOnly: true,
+      secure: import.meta.env.PROD,
+      sameSite: "lax",
+    });
+
+    // Return user data for client-side store synchronization
+    const userData = {
+      id: data.user.id,
+      email: data.user.email || "",
+      name: data.user.user_metadata?.name || (data.user.email ? data.user.email.split("@")[0] : "User"),
+      avatar_url: data.user.user_metadata?.avatar_url,
+      created_at: data.user.created_at,
+    };
+
     return new Response(
       JSON.stringify({
-        isAuthenticated: true,
-        redirect: "/generator",
+        success: true,
+        user: userData,
+        sessionExpiry: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
+        message: "Logowanie pomyślne",
       }),
-      { status: 200 }
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
     );
   } catch (error) {
-    if (error instanceof ZodError) {
-      // Return validation errors
-      const firstError = error.errors[0];
-      return new Response(JSON.stringify({ error: firstError.message }), { status: 400 });
-    }
-
-    // Handle other errors
-    return new Response(JSON.stringify({ error: "Wystąpił błąd podczas przetwarzania żądania" }), { status: 500 });
+    console.error("Login error:", error);
+    return new Response(
+      JSON.stringify({
+        error: "Błąd wewnętrzny serwera",
+        field: "general",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 };

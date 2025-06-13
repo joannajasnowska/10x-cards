@@ -1,59 +1,162 @@
 import type { APIRoute } from "astro";
 import { createSupabaseServerClient } from "../../../db/supabase.client";
-import { registerSchema } from "../../../schemas/auth";
-import { ZodError } from "zod";
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
 
-    // Validate input using Zod schema
-    const validatedData = registerSchema.parse(body);
-    const { email, password } = validatedData;
+    // Validation
+    if (!email || !password) {
+      return new Response(
+        JSON.stringify({
+          error: "Email i hasło są wymagane",
+          field: !email ? "email" : "password",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
-    // Create Supabase server client
+    if (password.length < 8) {
+      return new Response(
+        JSON.stringify({
+          error: "Hasło musi mieć co najmniej 8 znaków",
+          field: "password",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const supabase = createSupabaseServerClient({ cookies, headers: request.headers });
 
-    // Register the user without email verification (as per requirements)
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${new URL(request.url).origin}/login`,
-        // No email verification needed as per requirements
-        data: {},
+        data: {
+          name: name || email.split("@")[0],
+        },
       },
     });
 
     if (error) {
-      let errorMessage = "Wystąpił błąd podczas rejestracji";
+      let errorMessage = "Rejestracja nie powiodła się";
+      let field = "general";
 
-      // Provide more specific error messages based on error code
-      if (error.message.includes("already registered")) {
-        errorMessage = "Użytkownik z tym adresem email już istnieje";
-      } else if (error.message.includes("password")) {
-        errorMessage = "Hasło nie spełnia wymagań bezpieczeństwa";
+      if (error.message.includes("User already registered")) {
+        errorMessage = "Konto z tym adresem email już istnieje";
+        field = "email";
+      } else if (error.message.includes("Password should be at least")) {
+        errorMessage = "Hasło jest zbyt słabe";
+        field = "password";
+      } else if (error.message.includes("Invalid email")) {
+        errorMessage = "Proszę wprowadzić prawidłowy adres email";
+        field = "email";
+      } else if (error.message.includes("Sign ups not allowed")) {
+        errorMessage = "Rejestracja jest obecnie wyłączona";
+        field = "general";
       }
 
-      return new Response(JSON.stringify({ error: errorMessage }), { status: 400 });
+      return new Response(
+        JSON.stringify({
+          error: errorMessage,
+          field,
+          code: error.message,
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
-    // Return success response with redirect URL - without exposing sensitive user data
+    if (!data.user) {
+      return new Response(
+        JSON.stringify({
+          error: "Rejestracja nie powiodła się - nie utworzono użytkownika",
+          field: "general",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // If session is created (auto-login after registration)
+    if (data.session) {
+      // Set auth cookies
+      cookies.set("sb-access-token", data.session.access_token, {
+        path: "/",
+        maxAge: 60 * 60, // 1 hour
+        httpOnly: true,
+        secure: import.meta.env.PROD,
+        sameSite: "lax",
+      });
+
+      cookies.set("sb-refresh-token", data.session.refresh_token, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        httpOnly: true,
+        secure: import.meta.env.PROD,
+        sameSite: "lax",
+      });
+
+      // Return user data for client-side store synchronization
+      const userData = {
+        id: data.user.id,
+        email: data.user.email || "",
+        name: data.user.user_metadata?.name || (data.user.email ? data.user.email.split("@")[0] : "User"),
+        avatar_url: data.user.user_metadata?.avatar_url,
+        created_at: data.user.created_at,
+      };
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          user: userData,
+          sessionExpiry: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
+          message: "Registration successful",
+          requiresEmailConfirmation: false,
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    } else {
+      // Email confirmation required
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Registration successful. Please check your email to confirm your account.",
+          requiresEmailConfirmation: true,
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+  } catch (error) {
+    console.error("Registration error:", error);
     return new Response(
       JSON.stringify({
-        success: true,
-        redirect: "/login",
+        error: "Internal server error",
+        field: "general",
       }),
-      { status: 200 }
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
     );
-  } catch (error) {
-    if (error instanceof ZodError) {
-      // Return validation errors
-      const firstError = error.errors[0];
-      return new Response(JSON.stringify({ error: firstError.message }), { status: 400 });
-    }
-
-    // Handle other errors
-    return new Response(JSON.stringify({ error: "Wystąpił błąd podczas przetwarzania żądania" }), { status: 500 });
   }
 };

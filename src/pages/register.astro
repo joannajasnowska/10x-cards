@@ -1,20 +1,197 @@
 ---
-import PublicLayout from "../layouts/PublicLayout.astro";
-import RegisterForm from "../components/auth/RegisterForm";
+import Layout from "../layouts/Layout.astro";
 import { createSupabaseServerClient } from "../db/supabase.client";
 
-// Check if user is already logged in
+// Check if user is already authenticated
 const supabase = createSupabaseServerClient({
   cookies: Astro.cookies,
   headers: Astro.request.headers,
 });
 
-await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
-// Set prerender to false to enable SSR
-export const prerender = false;
+// Redirect if already logged in
+if (user) {
+  return Astro.redirect("/generator");
+}
 ---
 
-<PublicLayout title="Zarejestruj się | 10x Cards">
-  <RegisterForm client:load />
-</PublicLayout>
+<Layout title="Rejestracja - 10x Cards">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold">10x Cards</h1>
+        <p class="text-muted-foreground">Utwórz konto aby rozpocząć naukę</p>
+      </div>
+
+      <div class="bg-card border rounded-lg shadow-sm p-6">
+        <form action="/api/auth/register" method="POST" class="space-y-4">
+          <div class="space-y-2">
+            <label for="email" class="text-sm leading-none font-medium select-none"> Adres email </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+              placeholder="Wprowadź swój email"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label for="password" class="text-sm leading-none font-medium select-none"> Hasło </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="new-password"
+              required
+              class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+              placeholder="Utwórz hasło (min 8 znaków)"
+            />
+            <p class="text-sm text-muted-foreground">Hasło musi mieć co najmniej 8 znaków</p>
+          </div>
+
+          <div class="space-y-2">
+            <label for="confirmPassword" class="text-sm leading-none font-medium select-none"> Powtórz hasło </label>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              required
+              class="file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive"
+              placeholder="Powtórz hasło"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 h-9 px-4 py-2 w-full"
+          >
+            Utwórz konto
+          </button>
+
+          <div class="text-center text-sm">
+            <span class="text-muted-foreground">Masz już konto? </span>
+            <a href="/login" class="text-primary underline-offset-4 hover:underline font-medium"> Zaloguj się </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Handle form submission with fetch API for better UX
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.querySelector("form");
+      const submitButton = form?.querySelector('button[type="submit"]');
+
+      if (form && submitButton) {
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Client-side validation
+          const formData = new FormData(form);
+          const password = formData.get("password");
+          const confirmPassword = formData.get("confirmPassword");
+
+          if (password && password.length < 8) {
+            showError("Hasło musi mieć co najmniej 8 znaków");
+            return;
+          }
+
+          if (password !== confirmPassword) {
+            showError("Hasła nie są identyczne");
+            return;
+          }
+
+          // Update button state
+          const originalText = submitButton.textContent || "Utwórz konto";
+          submitButton.textContent = "Tworzenie konta...";
+          submitButton.disabled = true;
+
+          try {
+            const response = await fetch("/api/auth/register", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+              if (data.requiresEmailConfirmation) {
+                // Show success message about email confirmation
+                showSuccess("Rejestracja pomyślna! Sprawdź swoją skrzynkę email aby potwierdzić konto.");
+              } else {
+                // Auto-login was successful, redirect
+                window.location.href = "/generator";
+              }
+            } else {
+              // Show error
+              const errorMessage = data.error || "Rejestracja nie powiodła się";
+              showError(errorMessage);
+            }
+          } catch {
+            // console.error("Registration error:", error);
+            showError("Wystąpił błąd podczas rejestracji. Spróbuj ponownie.");
+          } finally {
+            // Reset button state
+            submitButton.textContent = originalText;
+            submitButton.disabled = false;
+          }
+        });
+      }
+
+      function showError(message) {
+        removeExistingMessages();
+        const errorDiv = createMessageDiv(message, "error");
+        form?.insertBefore(errorDiv, form.firstChild);
+      }
+
+      function showSuccess(message) {
+        removeExistingMessages();
+        const successDiv = createMessageDiv(message, "success");
+        form?.insertBefore(successDiv, form.firstChild);
+      }
+
+      function removeExistingMessages() {
+        const existingMessages = form?.querySelectorAll(".message");
+        existingMessages?.forEach((msg) => msg.remove());
+      }
+
+      function createMessageDiv(message, type) {
+        const div = document.createElement("div");
+        div.className = `message mb-4 px-4 py-3 rounded-md ${
+          type === "error"
+            ? "border border-destructive bg-destructive/10 text-destructive"
+            : "border border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900/10 dark:text-green-400"
+        }`;
+
+        const icon =
+          type === "error"
+            ? `<svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+               <circle cx="12" cy="12" r="10"/>
+               <line x1="15" y1="9" x2="9" y2="15"/>
+               <line x1="9" y1="9" x2="15" y2="15"/>
+             </svg>`
+            : `<svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+               <polyline points="22,4 12,14.01 9,11.01"/>
+             </svg>`;
+
+        div.innerHTML = `
+          <div class="flex items-center gap-2">
+            ${icon}
+            <span class="text-sm">${message}</span>
+          </div>
+        `;
+
+        return div;
+      }
+    });
+  </script>
+</Layout>
