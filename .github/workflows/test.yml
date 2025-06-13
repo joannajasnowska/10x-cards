@@ -52,37 +52,4 @@ jobs:
           path: coverage/
           retention-days: 5
 
-  status-comment:
-    name: Status Comment
-    runs-on: ubuntu-latest
-    needs: [lint, unit-test]
-    if: always()
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Create status comment
-        uses: actions/github-script@v7
-        if: ${{ needs.unit-test.result == 'success' }}
-        with:
-          script: |
-            const status_table = `
-            | Check | Status |
-            | ----- | ------ |
-            | Lint | ✅ Passed |
-            | Unit Tests | ✅ Passed |
-            `;
-
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `### ✅ All checks have passed!\n\n` +
-                      status_table +
-                      `\n\n[View detailed reports](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})`
-              });
-       
