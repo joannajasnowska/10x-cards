@@ -1,8 +1,8 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import Welcome from "../components/Welcome.astro";
----
+// Redirect to generator page - this will trigger the authentication middleware
+// which will either allow access or redirect to login if not authenticated
+export const prerender = false;
 
-<Layout title="Flashcards Generator - Tworzenie fiszek z AI">
-  <Welcome />
-</Layout>
+// Perform immediate redirect to generator
+return Astro.redirect("/generator");
+---
