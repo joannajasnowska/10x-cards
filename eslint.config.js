@@ -16,6 +16,7 @@ const __dirname = path.dirname(__filename);
 const gitignorePath = path.resolve(__dirname, ".gitignore");
 
 const baseConfig = tseslint.config({
+  files: ["**/*.{js,jsx,ts,tsx}"],
   extends: [eslint.configs.recommended, tseslint.configs.strict, tseslint.configs.stylistic],
   rules: {
     "no-console": "warn",
@@ -64,12 +65,24 @@ const reactConfig = tseslint.config({
   },
 });
 
+// Prettier config for JS/TS files only
+const prettierConfig = tseslint.config({
+  files: ["**/*.{js,jsx,ts,tsx}"],
+  extends: [eslintPluginPrettier],
+});
+
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   baseConfig,
   servicesAndApiConfig,
   jsxA11yConfig,
   reactConfig,
-  eslintPluginAstro.configs["flat/recommended"],
-  eslintPluginPrettier
+  prettierConfig,
+  ...eslintPluginAstro.configs["flat/recommended"],
+  {
+    files: ["**/*.astro"],
+    rules: {
+      "prettier/prettier": "off",
+    },
+  }
 );
