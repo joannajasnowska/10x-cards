@@ -11,6 +11,26 @@ export default function RegisterForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 6) {
+      return "Hasło musi mieć co najmniej 6 znaków";
+    }
+
+    if (!/(?=.*[a-z])/.test(password)) {
+      return "Hasło musi zawierać co najmniej jedną małą literę";
+    }
+
+    if (!/(?=.*[A-Z])/.test(password)) {
+      return "Hasło musi zawierać co najmniej jedną wielką literę";
+    }
+
+    if (!/(?=.*\d)/.test(password)) {
+      return "Hasło musi zawierać co najmniej jedną cyfrę";
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -21,13 +41,22 @@ export default function RegisterForm() {
       return;
     }
 
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Nieprawidłowy format adresu email");
+      return;
+    }
+
     if (!password) {
       setError("Podaj hasło");
       return;
     }
 
-    if (password.length < 8) {
-      setError("Hasło musi zawierać co najmniej 8 znaków");
+    // Password validation
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
 
@@ -108,9 +137,11 @@ export default function RegisterForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
-            aria-invalid={!!error && (!password || password.length < 8)}
+            aria-invalid={!!error && (!password || validatePassword(password) !== null)}
           />
-          <p className="text-xs text-muted-foreground">Hasło musi zawierać co najmniej 8 znaków</p>
+          <p className="text-xs text-muted-foreground">
+            Hasło musi zawierać co najmniej 6 znaków, jedną małą literę, jedną wielką literę i jedną cyfrę
+          </p>
         </div>
 
         <div className="space-y-2">

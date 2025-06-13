@@ -19,7 +19,6 @@
 
   - `LoginForm` – Komponent odpowiedzialny za logowanie; zawiera pola: email, hasło oraz przycisk submit.
   - `RegisterForm` – Komponent obsługujący rejestrację; zawiera pola: email, hasło, potwierdzenie hasła.
-  
 
 - **Walidacja i komunikaty błędów:**
   - Walidacja na poziomie frontendu (sprawdzanie formatu email, minimalnej długości hasła, zgodności haseł w rejestracji).
@@ -40,7 +39,6 @@
   - `POST /api/auth/signup` – Rejestracja użytkownika. Przyjmuje dane: email oraz hasło. Wykorzystuje metodę Supabase `signUp`.
   - `POST /api/auth/login` – Logowanie użytkownika. Przyjmuje dane: email, hasło. Zwraca token sesji lub odpowiedni komunikat błędu.
   - `POST /api/auth/logout` – Wylogowanie użytkownika; czyści sesję poprzez `signOut`.
- 
 
 - **Modele danych:**
   - Model użytkownika zgodny z danymi zwracanymi przez Supabase Auth.
@@ -76,7 +74,6 @@
     - Endpoint `/api/auth/login` korzysta z `supabase.auth.signIn` (lub `signInWithPassword`) w celu autoryzacji, a w odpowiedzi zwraca token sesji.
   - **Wylogowanie:**
     - Endpoint `/api/auth/logout` wywołuje metodę `supabase.auth.signOut`, usuwając sesję użytkownika.
-  
 
 ### Bezpieczeństwo i middleware
 
@@ -89,7 +86,7 @@ Implementacja modułu autentykacji w oparciu o Supabase Auth integruje frontend 
 
 Kluczowe komponenty rozwiązania:
 
-- Astro pages dla procesów logowania, rejestracji i resetowania hasła.
+- Astro pages dla procesów logowania, rejestracji.
 - React komponenty (`LoginForm`, `RegisterForm`) odpowiedzialne za interaktywną walidację i obsługę formularzy.
 - Dedykowane endpointy API w `src/pages/api/auth` do komunikacji z Supabase Auth.
 - Middleware oraz konfiguracja server-side renderingu do ochrony tras wymagających autentykacji.

@@ -20,8 +20,20 @@ export default function LoginForm() {
       return;
     }
 
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Nieprawidłowy format adresu email");
+      return;
+    }
+
     if (!password) {
       setError("Podaj hasło");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Hasło musi mieć co najmniej 6 znaków");
       return;
     }
 

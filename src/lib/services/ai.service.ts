@@ -1,6 +1,6 @@
 import { OpenRouterService } from "../openrouter/service";
 import type { GenerationFlashcardProposalDTO } from "../../types";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "../../db/supabase.client";
 
 export class AiService {
   private readonly openRouter: OpenRouterService;
@@ -31,29 +31,7 @@ export class AiService {
 
     this.openRouter = new OpenRouterService(supabase, {
       apiKey,
-      modelName: "openai/gpt-4o-mini",
-      modelParameters: {
-        temperature: 0.7,
-        max_tokens: 2000,
-        top_p: 1.0,
-      },
-      systemMessage: `You are a flashcard generation assistant. Your task is to create educational flashcards from the provided text.
-Each flashcard should have a front (question) and back (answer) side.
-The front should be a clear, concise question or prompt.
-The back should contain a complete, accurate answer based on the text. Focus on important facts, definitions, concepts, and relationships.
-
-Follow these rules:
-- Create 5-10 flashcards depending on the content
-- Front side should be max 200 characters
-- Back side should be max 500 characters
-- Focus on key concepts, definitions, and important facts
-- Make questions clear and unambiguous
-- Ensure answers are accurate and complete
-- Avoid overly complex or compound questions
-- Format consistently across all flashcards
-
-Your response must be a valid JSON object with a "flashcards" array containing the flashcard objects.
-Do not include any other text or explanation in your response, only the JSON object.`,
+      baseUrl: "https://openrouter.ai/api/v1",
     });
 
     // Set response format for JSON validation
@@ -119,5 +97,9 @@ Remember:
       }
       throw new Error("Failed to parse AI response: Unknown error");
     }
+  }
+
+  async generateFlashcards(topic: string, count = 10) {
+    return this.openRouter.generateFlashcards(topic, count);
   }
 }
