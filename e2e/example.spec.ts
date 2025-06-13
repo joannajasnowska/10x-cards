@@ -20,8 +20,8 @@ test.describe("Home Page", () => {
     // Act
     await homePage.goto();
 
-    // Assert
-    await expect(page).toHaveTitle("10x Cards");
+    // Assert - expect login page title since users are redirected when not authenticated
+    await expect(page).toHaveTitle("Logowanie - 10x Cards");
   });
 
   test("should take a screenshot that matches baseline", async ({ page }) => {

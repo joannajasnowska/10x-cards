@@ -18,14 +18,13 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  // Comment out the webServer config for now to allow tests to run without requiring a build
-  /* 
+  // Web server configuration for e2e tests - uses preview mode on port 4321
   webServer: {
-    command: "npm run preview",
+    command: "npm run build && npm run preview -- --port 4321",
     url: "http://localhost:4321",
     reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000, // 2 minutes timeout
     stdout: "pipe",
     stderr: "pipe",
   },
-  */
 });
